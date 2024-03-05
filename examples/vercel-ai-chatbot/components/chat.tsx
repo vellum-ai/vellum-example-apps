@@ -45,8 +45,11 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         id,
         previewToken
       },
+      async experimental_onToolCall(chatMessages, toolCalles) {
+        // Perform API Call
+      },
       onResponse(response) {
-        if (response.status === 401) {
+        if (response.status >= 400) {
           toast.error(response.statusText)
         }
       },
@@ -56,6 +59,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         }
       }
     })
+  
   return (
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>

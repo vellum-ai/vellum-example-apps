@@ -1,19 +1,28 @@
-import { kv } from '@vercel/kv'
-import { OpenAIStream, StreamingTextResponse } from 'ai'
-import OpenAI from 'openai'
+import { StreamingTextResponse } from 'ai'
+import { VellumClient } from 'vellum-ai'
 
 import { auth } from '@/auth'
-import { nanoid } from '@/lib/utils'
+import { z } from 'zod'
+import { ChatMessageRole } from 'vellum-ai/api/types'
 
 export const runtime = 'edge'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+const vellum = new VellumClient({
+  apiKey: process.env.VELLUM_API_KEY
+})
+
+const zBody = z.object({
+  messages: z
+    .object({
+      role: z.enum(['user']),
+      content: z.string()
+    })
+    .array()
 })
 
 export async function POST(req: Request) {
   const json = await req.json()
-  const { messages, previewToken } = json
+  const { messages } = zBody.parse(json)
   const userId = (await auth())?.user.id
 
   if (!userId) {
@@ -22,42 +31,48 @@ export async function POST(req: Request) {
     })
   }
 
-  if (previewToken) {
-    openai.apiKey = previewToken
-  }
-
-  const res = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages,
-    temperature: 0.7,
-    stream: true
+  const res = await vellum.executeWorkflowStream({
+    workflowDeploymentName: 'vercel-chatbot-demo',
+    releaseTag: 'production',
+    inputs: [
+      {
+        type: 'CHAT_HISTORY',
+        value: messages.map(m => ({
+          role: m.role.toUpperCase() as ChatMessageRole,
+          text: m.content
+        })),
+        name: 'messages'
+      }
+    ]
   })
 
-  const stream = OpenAIStream(res, {
-    async onCompletion(completion) {
-      const title = json.messages[0].content.substring(0, 100)
-      const id = json.id ?? nanoid()
-      const createdAt = Date.now()
-      const path = `/chat/${id}`
-      const payload = {
-        id,
-        title,
-        userId,
-        createdAt,
-        path,
-        messages: [
-          ...messages,
-          {
-            content: completion,
-            role: 'assistant'
+  const stream = new ReadableStream({
+    async pull(controller) {
+      for await (const event of res) {
+        if (event.type !== 'WORKFLOW') {
+          continue
+        }
+        if (event.data.state === 'REJECTED') {
+          controller.enqueue(JSON.stringify(event.data.error!))
+          controller.close()
+          break
+        }
+        if (event.data.state === 'INITIATED') {
+          continue
+        }
+        if (event.data.state === 'STREAMING') {
+          const output = event.data.output!
+          if (output.state === 'STREAMING') {
+            controller.enqueue(output.delta)
           }
-        ]
+          // if (output.state === 'FULFILLED' && output.type === 'FUNCTION_CALL') {
+          //   controller.enqueue(output.value)
+          // }
+        }
+        if (event.data.state === 'FULFILLED') {
+          controller.close()
+        }
       }
-      await kv.hmset(`chat:${id}`, payload)
-      await kv.zadd(`user:chat:${userId}`, {
-        score: createdAt,
-        member: `chat:${id}`
-      })
     }
   })
 
