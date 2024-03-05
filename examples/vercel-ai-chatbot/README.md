@@ -4,7 +4,7 @@
 </a>
 
 <p align="center">
-  An open-source AI chatbot app template built with Next.js, the Vercel AI SDK, OpenAI, and Vercel KV.
+  An open-source AI chatbot app template built with Next.js, the Vercel AI SDK, OpenAI, and Vercel KV. Cloned from https://github.com/vercel/ai-chatbot.git, adapted to support Vellum workflows.
 </p>
 
 <p align="center">
@@ -69,3 +69,4 @@ This library is created by [Vercel](https://vercel.com) and [Next.js](https://ne
 - Jared Palmer ([@jaredpalmer](https://twitter.com/jaredpalmer)) - [Vercel](https://vercel.com)
 - Shu Ding ([@shuding\_](https://twitter.com/shuding_)) - [Vercel](https://vercel.com)
 - shadcn ([@shadcn](https://twitter.com/shadcn)) - [Vercel](https://vercel.com)
+- Vellum - [Vellum](https://vellum.ai)
