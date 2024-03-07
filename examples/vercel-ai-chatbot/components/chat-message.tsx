@@ -8,7 +8,7 @@ import remarkMath from 'remark-math'
 import { cn } from '@/lib/utils'
 import { CodeBlock } from '@/components/ui/codeblock'
 import { MemoizedReactMarkdown } from '@/components/markdown'
-import { IconOpenAI, IconUser } from '@/components/ui/icons'
+import { IconOpenAI, IconUser, IconGitHub } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
 
 export interface ChatMessageProps {
@@ -29,7 +29,13 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
             : 'bg-primary text-primary-foreground'
         )}
       >
-        {message.role === 'user' ? <IconUser /> : <IconOpenAI />}
+        {message.role === 'user' ? (
+          <IconUser />
+        ) : message.role === 'tool' || message.role === 'function' ? (
+          <IconGitHub />
+        ) : (
+          <IconOpenAI />
+        )}
       </div>
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown
@@ -71,7 +77,12 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
             }
           }}
         >
-          {message.content}
+          {`${message.content}
+          ${
+            message.tool_calls
+              ? `Calling ${typeof message.tool_calls[0] === 'string' ? message.tool_calls[0] : message.tool_calls[0].function.name}...`
+              : ''
+          }`}
         </MemoizedReactMarkdown>
         <ChatMessageActions message={message} />
       </div>

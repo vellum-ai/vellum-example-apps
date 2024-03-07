@@ -1,3 +1,4 @@
+import { kv } from '@vercel/kv'
 import { StreamingTextResponse } from 'ai'
 import { VellumClient } from 'vellum-ai'
 
@@ -8,13 +9,18 @@ import { ChatMessageRole } from 'vellum-ai/api/types'
 export const runtime = 'edge'
 
 const vellum = new VellumClient({
-  apiKey: process.env.VELLUM_API_KEY
+  apiKey: process.env.VELLUM_API_KEY!
 })
 
 const zBody = z.object({
+  id: z.string(),
   messages: z
     .object({
-      role: z.enum(['user']),
+      role: z
+        .enum(['user', 'assistant', 'function', 'system', 'tool'])
+        .transform<ChatMessageRole>(s =>
+          s === 'tool' ? 'FUNCTION' : (s.toUpperCase() as ChatMessageRole)
+        ),
       content: z.string()
     })
     .array()
@@ -22,7 +28,7 @@ const zBody = z.object({
 
 export async function POST(req: Request) {
   const json = await req.json()
-  const { messages } = zBody.parse(json)
+  const { messages, id } = zBody.parse(json)
   const userId = (await auth())?.user.id
 
   if (!userId) {
@@ -38,8 +44,11 @@ export async function POST(req: Request) {
       {
         type: 'CHAT_HISTORY',
         value: messages.map(m => ({
-          role: m.role.toUpperCase() as ChatMessageRole,
-          text: m.content
+          role: m.role,
+          text:
+            m.role === 'FUNCTION'
+              ? JSON.stringify({ content: m.content, tool_call_id: '' })
+              : m.content
         })),
         name: 'messages'
       }
@@ -53,7 +62,13 @@ export async function POST(req: Request) {
           continue
         }
         if (event.data.state === 'REJECTED') {
-          controller.enqueue(JSON.stringify(event.data.error!))
+          controller.enqueue(
+            `We failed to resolve the latest message. Here's why: ${JSON.stringify(event.data.error!)}
+
+For demo purposes, here's what I'm supposed to say:
+
+The temperature in Miami is 75 degrees!`
+          )
           controller.close()
           break
         }
@@ -62,18 +77,33 @@ export async function POST(req: Request) {
         }
         if (event.data.state === 'STREAMING') {
           const output = event.data.output!
-          if (output.state === 'STREAMING') {
-            controller.enqueue(output.delta)
+          if (output.name == 'text-output') {
+            if (
+              output.state === 'STREAMING' &&
+              !(output.delta as string)?.includes('FulfilledFunctionCall')
+            ) {
+              controller.enqueue(output.delta)
+            }
+            if (
+              output.state === 'FULFILLED' &&
+              (output.value as string)?.includes('tool_calls')
+            ) {
+              controller.enqueue(output.value)
+            }
           }
-          // if (output.state === 'FULFILLED' && output.type === 'FUNCTION_CALL') {
-          //   controller.enqueue(output.value)
-          // }
         }
         if (event.data.state === 'FULFILLED') {
           controller.close()
         }
       }
     }
+  })
+  await kv.hmset(`chat:${id}`, {
+    // TODO
+  })
+  await kv.zadd(`user:chat:${userId}`, {
+    score: Date.now(),
+    member: `chat:${id}`
   })
 
   return new StreamingTextResponse(stream)
