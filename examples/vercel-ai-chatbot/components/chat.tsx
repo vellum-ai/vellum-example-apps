@@ -45,8 +45,21 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         id,
         previewToken
       },
+      async experimental_onToolCall(chatMessages, toolCalls) {
+        // Perform API Call
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        return {
+          messages: chatMessages.concat({
+            id: toolCalls[0].id,
+            tool_call_id: toolCalls[0].id,
+            createdAt: new Date(),
+            content: '`75 degrees`',
+            role: 'tool'
+          })
+        }
+      },
       onResponse(response) {
-        if (response.status === 401) {
+        if (response.status >= 400) {
           toast.error(response.statusText)
         }
       },
@@ -56,6 +69,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         }
       }
     })
+
   return (
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
