@@ -6,6 +6,7 @@ import {
   ChatMessage,
   ChatMessageContent,
   FulfilledFunctionCall,
+  FunctionCall,
   WorkflowResultEventOutputData
 } from 'vellum-ai/api'
 
@@ -55,7 +56,7 @@ const useVellumChat = ({
         const outputIds: string[] = []
         while (!resultChunk?.done) {
           if (abortController.signal.aborted) {
-            return
+            break
           }
 
           resultChunk = await reader.read().catch(e => {
@@ -65,7 +66,7 @@ const useVellumChat = ({
             throw e
           })
           if (!resultChunk?.value) {
-            return
+            break
           }
 
           const decoder = new TextDecoder('utf-8')
@@ -98,43 +99,47 @@ const useVellumChat = ({
                 existingOutput.value += parsedChunkValue.delta as string
               }
             } else if (parsedChunkValue.state === 'FULFILLED') {
-              outputIds.push(parsedChunkValue.id)
-              outputs[parsedChunkValue.id] = {
-                type: 'FUNCTION_CALL',
-                value: parsedChunkValue.value as FulfilledFunctionCall
+              if (
+                parsedChunkValue.type === 'FUNCTION_CALL' &&
+                parsedChunkValue.value &&
+                parsedChunkValue.value.state === 'FULFILLED'
+              ) {
+                outputIds.push(parsedChunkValue.id)
+                const { state, ...value } = parsedChunkValue.value
+                if (state === 'FULFILLED') {
+                  outputs[parsedChunkValue.id] = {
+                    type: 'FUNCTION_CALL',
+                    value
+                  }
+                }
               }
             }
 
-            const assistantContent =
-              outputIds.length === 1
-                ? outputs[outputIds[0]] ?? {
-                    type: 'STRING',
-                    value: ''
-                  }
-                : {
-                    type: 'ARRAY' as const,
-                    value: outputIds
-                      .map(id => outputs[id])
-                      .filter(
-                        (output): output is ArrayChatMessageContentItem =>
-                          output !== null
-                      )
-                  }
-            setMessages(
-              request.messages.concat({
-                role: 'ASSISTANT' as const,
-                content: assistantContent
-              })
-            )
+            const contentOutputs = outputIds
+              .map(id => outputs[id])
+              .filter(
+                (output): output is ArrayChatMessageContentItem =>
+                  output !== null
+              )
+            if (contentOutputs.length > 0) {
+              const assistantContent =
+                contentOutputs.length === 1
+                  ? contentOutputs[0]
+                  : {
+                      type: 'ARRAY' as const,
+                      value: contentOutputs
+                    }
+              setMessages(
+                request.messages.concat({
+                  role: 'ASSISTANT',
+                  content: assistantContent
+                })
+              )
+            }
           })
         }
       } catch (error) {
         console.error(error)
-      } finally {
-        setIsLoading(false)
-        if (!path.includes('chat')) {
-          window.history.pushState({}, '', `/chat/${id}`)
-        }
       }
 
       const mostRecentMessage = messagesRef.current.slice(-1)[0]
@@ -142,15 +147,23 @@ const useVellumChat = ({
         const functionCall = mostRecentMessage.content.value
         if (onFunctionCall) {
           const response = await onFunctionCall(functionCall)
-          setMessages(
-            messagesRef.current.concat({
-              role: 'FUNCTION',
-              content: {
-                type: 'STRING',
-                value: JSON.stringify(response)
-              }
-            })
-          )
+          const newMessages = messagesRef.current.concat({
+            role: 'FUNCTION',
+            content: {
+              type: 'STRING',
+              value: JSON.stringify(response)
+            }
+          })
+          setMessages(newMessages)
+          await triggerRequest({
+            messages: newMessages,
+            id: request.id
+          })
+        }
+      } else {
+        setIsLoading(false)
+        if (!path.includes('chat')) {
+          window.history.pushState({}, '', `/chat/${id}`)
         }
       }
     },

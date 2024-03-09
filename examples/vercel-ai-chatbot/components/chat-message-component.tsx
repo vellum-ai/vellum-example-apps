@@ -9,10 +9,28 @@ import { CodeBlock } from '@/components/ui/codeblock'
 import { MemoizedReactMarkdown } from '@/components/markdown'
 import { IconOpenAI, IconUser, IconGitHub } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
-import { ChatMessage } from 'vellum-ai/api'
+import { ChatMessage, ChatMessageContent } from 'vellum-ai/api'
 
 export interface ChatMessageProps {
   message: ChatMessage
+}
+
+const serializeChatMessageContent = (content?: ChatMessageContent): string => {
+  if (!content) return ''
+  switch (content.type) {
+    case 'STRING':
+      return content.value
+    case 'ARRAY':
+      return content.value
+        .map(sub => serializeChatMessageContent(sub))
+        .join('\n\n')
+    case 'FUNCTION_CALL':
+      return `_Calling function \`${content.value.name}\`..._`
+    default:
+      return `\`\`\`
+${JSON.stringify(content.value)}
+\`\`\``
+  }
 }
 
 export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
@@ -77,7 +95,7 @@ export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
             }
           }}
         >
-          {`${message.content?.value}`}
+          {serializeChatMessageContent(message.content)}
         </MemoizedReactMarkdown>
         <ChatMessageActions message={message} />
       </div>
