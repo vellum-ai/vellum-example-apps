@@ -1,7 +1,6 @@
 // Inspired by Chatbot-UI and modified to fit the needs of this project
 // @see https://github.com/mckaywrigley/chatbot-ui/blob/main/components/Chat/ChatMessage.tsx
 
-import { Message } from 'ai'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 
@@ -10,12 +9,13 @@ import { CodeBlock } from '@/components/ui/codeblock'
 import { MemoizedReactMarkdown } from '@/components/markdown'
 import { IconOpenAI, IconUser, IconGitHub } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
+import { ChatMessage } from 'vellum-ai/api'
 
 export interface ChatMessageProps {
-  message: Message
+  message: ChatMessage
 }
 
-export function ChatMessage({ message, ...props }: ChatMessageProps) {
+export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
   return (
     <div
       className={cn('group relative mb-4 flex items-start md:-ml-12')}
@@ -24,14 +24,14 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
       <div
         className={cn(
           'flex size-8 shrink-0 select-none items-center justify-center rounded-md border shadow',
-          message.role === 'user'
+          message.role === 'USER'
             ? 'bg-background'
             : 'bg-primary text-primary-foreground'
         )}
       >
-        {message.role === 'user' ? (
+        {message.role === 'USER' ? (
           <IconUser />
-        ) : message.role === 'tool' || message.role === 'function' ? (
+        ) : message.role === 'FUNCTION' ? (
           <IconGitHub />
         ) : (
           <IconOpenAI />
@@ -77,12 +77,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
             }
           }}
         >
-          {`${message.content}
-          ${
-            message.tool_calls
-              ? `Calling ${typeof message.tool_calls[0] === 'string' ? message.tool_calls[0] : message.tool_calls[0].function.name}...`
-              : ''
-          }`}
+          {`${message.content?.value}`}
         </MemoizedReactMarkdown>
         <ChatMessageActions message={message} />
       </div>

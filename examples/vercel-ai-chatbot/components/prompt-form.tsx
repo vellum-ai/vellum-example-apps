@@ -12,18 +12,12 @@ import {
 import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 
-export interface PromptProps
-  extends Pick<UseChatHelpers, 'input' | 'setInput'> {
-  onSubmit: (value: string) => void
+export interface PromptProps {
+  onSubmit: (value: string) => Promise<void>
   isLoading: boolean
 }
 
-export function PromptForm({
-  onSubmit,
-  input,
-  setInput,
-  isLoading
-}: PromptProps) {
+export function PromptForm({ onSubmit, isLoading }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
@@ -37,10 +31,11 @@ export function PromptForm({
     <form
       onSubmit={async e => {
         e.preventDefault()
+        const input = inputRef.current?.value
         if (!input?.trim()) {
           return
         }
-        setInput('')
+        formRef.current?.reset()
         await onSubmit(input)
       }}
       ref={formRef}
@@ -70,8 +65,7 @@ export function PromptForm({
           tabIndex={0}
           onKeyDown={onKeyDown}
           rows={1}
-          value={input}
-          onChange={e => setInput(e.target.value)}
+          defaultValue={''}
           placeholder="Send a message."
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
@@ -79,11 +73,7 @@ export function PromptForm({
         <div className="absolute right-0 top-4 sm:right-4">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                type="submit"
-                size="icon"
-                disabled={isLoading || input === ''}
-              >
+              <Button type="submit" size="icon" disabled={isLoading}>
                 <IconArrowElbow />
                 <span className="sr-only">Send message</span>
               </Button>

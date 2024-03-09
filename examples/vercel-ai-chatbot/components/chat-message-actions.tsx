@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button'
 import { IconCheck, IconCopy } from '@/components/ui/icons'
 import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
+import { ChatMessage } from 'vellum-ai/api'
 
 interface ChatMessageActionsProps extends React.ComponentProps<'div'> {
-  message: Message
+  message: ChatMessage
 }
 
 export function ChatMessageActions({
@@ -19,8 +20,8 @@ export function ChatMessageActions({
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
 
   const onCopy = () => {
-    if (isCopied) return
-    copyToClipboard(message.content)
+    if (isCopied || message.content?.type !== 'STRING') return
+    copyToClipboard(message.content?.value)
   }
 
   return (
