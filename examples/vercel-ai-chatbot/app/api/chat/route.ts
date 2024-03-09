@@ -15,12 +15,7 @@ import { nanoid } from 'nanoid'
 export const runtime = 'edge'
 
 const vellum = new VellumClient({
-  apiKey: process.env.VELLUM_API_KEY!,
-  environment: {
-    default: 'http://127.0.0.1:8000',
-    predict: 'http://127.0.0.1:8000',
-    documents: 'http://127.0.0.1:8000'
-  }
+  apiKey: process.env.VELLUM_API_KEY!
 })
 
 const requestBodySerializer = serialization.object({
