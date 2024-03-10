@@ -8,18 +8,14 @@ import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
 import { IconRefresh, IconShare, IconStop } from '@/components/ui/icons'
 import { FooterText } from '@/components/footer'
 import { ChatShareDialog } from '@/components/chat-share-dialog'
+import { ChatMessage } from 'vellum-ai/api'
 
-export interface ChatPanelProps
-  extends Pick<
-    UseChatHelpers,
-    | 'append'
-    | 'isLoading'
-    | 'reload'
-    | 'messages'
-    | 'stop'
-    | 'input'
-    | 'setInput'
-  > {
+export interface ChatPanelProps {
+  isLoading: boolean
+  stop: () => void
+  append: (message: ChatMessage) => Promise<void>
+  reload: () => Promise<void>
+  messages: ChatMessage[]
   id?: string
   title?: string
 }
@@ -31,8 +27,6 @@ export function ChatPanel({
   stop,
   append,
   reload,
-  input,
-  setInput,
   messages
 }: ChatPanelProps) {
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
@@ -88,13 +82,13 @@ export function ChatPanel({
           <PromptForm
             onSubmit={async value => {
               await append({
-                id,
-                content: value,
-                role: 'user'
+                content: {
+                  type: 'STRING',
+                  value
+                },
+                role: 'USER'
               })
             }}
-            input={input}
-            setInput={setInput}
             isLoading={isLoading}
           />
           <FooterText className="hidden sm:block" />

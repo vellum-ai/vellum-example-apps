@@ -94,7 +94,7 @@ export async function clearChats() {
 export async function getSharedChat(id: string) {
   const chat = await kv.hgetall<Chat>(`chat:${id}`)
 
-  if (!chat || !chat.sharePath) {
+  if (!chat) {
     return null
   }
 
@@ -118,12 +118,7 @@ export async function shareChat(id: string) {
     }
   }
 
-  const payload = {
-    ...chat,
-    sharePath: `/share/${chat.id}`
-  }
+  await kv.hmset(`chat:${chat.id}`, chat)
 
-  await kv.hmset(`chat:${chat.id}`, payload)
-
-  return payload
+  return chat
 }

@@ -9,45 +9,29 @@ import { EmptyScreen } from '@/components/empty-screen'
 import { ChatScrollAnchor } from '@/components/chat-scroll-anchor'
 import { toast } from 'react-hot-toast'
 import { usePathname, useRouter } from 'next/navigation'
+import { ChatMessage } from 'vellum-ai/api'
+import useVellumChat from '@/lib/hooks/use-vellum-chat'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
-  initialMessages?: Message[]
+  initialMessages?: ChatMessage[]
   id?: string
 }
 
 export function Chat({ id, initialMessages, className }: ChatProps) {
-  const path = usePathname()
-  const { messages, append, reload, stop, isLoading, input, setInput } =
-    useChat({
-      initialMessages,
-      id,
-      body: {
-        id
-      },
-      async experimental_onToolCall(chatMessages, toolCalls) {
-        // Perform API Call
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        return {
-          messages: chatMessages.concat({
-            id: toolCalls[0].id,
-            tool_call_id: toolCalls[0].id,
-            createdAt: new Date(),
-            content: '`75 degrees`',
-            role: 'tool'
-          })
-        }
-      },
-      onResponse(response) {
-        if (response.status >= 400) {
-          toast.error(response.statusText)
-        }
-      },
-      onFinish() {
-        if (!path.includes('chat')) {
-          window.history.pushState({}, '', `/chat/${id}`)
-        }
+  const { messages, append, reload, stop, isLoading } = useVellumChat({
+    initialMessages,
+    chatId: id,
+    async onFunctionCall(functionCall) {
+      // Replace this with your own function call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      switch (functionCall.name) {
+        case 'get_current_weather':
+          return { temperature: 75, metric: 'degrees', unit: 'F' }
+        default:
+          return { notFound: true }
       }
-    })
+    }
+  })
 
   return (
     <>
@@ -58,7 +42,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (
-          <EmptyScreen setInput={setInput} />
+          <EmptyScreen append={append} />
         )}
       </div>
       <ChatPanel
@@ -68,8 +52,6 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         append={append}
         reload={reload}
         messages={messages}
-        input={input}
-        setInput={setInput}
       />
     </>
   )
