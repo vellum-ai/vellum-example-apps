@@ -46,61 +46,13 @@ export async function POST(req: Request) {
     })
   }
 
-  // TODO: Vellum has some bugs where it's not handling some messages correctly
-  const hackedMessages = messages.map<ChatMessage>(
-    (message, index, allMessages) => {
-      if (
-        message.role === 'ASSISTANT' &&
-        message.content?.type === 'FUNCTION_CALL'
-      ) {
-        return {
-          ...message,
-          content: {
-            type: 'STRING',
-            value: JSON.stringify({
-              tool_calls: [
-                {
-                  id: message.content.value.id,
-                  type: 'function',
-                  function: {
-                    name: message.content.value.name,
-                    arguments: JSON.stringify(message.content.value.arguments)
-                  }
-                }
-              ]
-            })
-          }
-        }
-      } else if (
-        message.role === 'FUNCTION' &&
-        message.content?.type === 'STRING'
-      ) {
-        return {
-          ...message,
-          content: {
-            type: 'STRING',
-            value: JSON.stringify({
-              content: message.content.value,
-              tool_call_id: (
-                allMessages[index - 1].content
-                  ?.value as FunctionCallChatMessageContentValue
-              ).id
-            })
-          }
-        }
-      } else {
-        return message
-      }
-    }
-  )
-
   const res = await vellum.executeWorkflowStream({
     workflowDeploymentName: 'vercel-chatbot-demo',
     releaseTag: 'production',
     inputs: [
       {
         type: 'CHAT_HISTORY',
-        value: hackedMessages,
+        value: messages,
         name: 'messages'
       }
     ]
