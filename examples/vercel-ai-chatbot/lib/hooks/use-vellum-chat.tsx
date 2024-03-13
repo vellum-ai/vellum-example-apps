@@ -172,8 +172,10 @@ const useVellumChat = ({
 
   const append = React.useCallback(
     (message: ChatMessage) => {
+      const newMessages = messagesRef.current.concat(message)
+      setMessages(newMessages)
       return triggerRequest({
-        messages: messagesRef.current.concat(message),
+        messages: newMessages,
         id
       })
     },
