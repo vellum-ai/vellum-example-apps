@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { type UseChatHelpers } from 'ai/react'
 
 import { shareChat } from '@/app/actions'
 import { Button } from '@/components/ui/button'
