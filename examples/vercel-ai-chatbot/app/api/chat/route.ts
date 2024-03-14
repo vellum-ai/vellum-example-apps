@@ -4,11 +4,7 @@ import { ChatMessage as ChatMessageSerializer } from 'vellum-ai/serialization'
 import { serialization } from 'vellum-ai/core'
 
 import { auth } from '@/auth'
-import {
-  ChatMessage,
-  FunctionCallChatMessageContentValue,
-  WorkflowOutput
-} from 'vellum-ai/api'
+import { WorkflowOutput } from 'vellum-ai/api'
 import { nanoid } from 'nanoid'
 
 export const runtime = 'edge'
