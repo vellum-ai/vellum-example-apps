@@ -152,7 +152,8 @@ const useVellumChat = ({
             content: {
               type: 'STRING',
               value: JSON.stringify(response)
-            }
+            },
+            source: functionCall.id
           })
           setMessages(newMessages)
           await triggerRequest({

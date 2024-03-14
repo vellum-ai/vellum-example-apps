@@ -96,8 +96,8 @@ dependencies:
     specifier: ^5.1.1
     version: 5.1.1
   vellum-ai:
-    specifier: ^0.3.9
-    version: 0.3.10
+    specifier: ^0.3.11
+    version: 0.3.11
   zod:
     specifier: ^3.22.4
     version: 3.22.4
@@ -5006,8 +5006,8 @@ packages:
       sade: 1.8.1
     dev: false
 
-  /vellum-ai@0.3.10:
-    resolution: {integrity: sha512-/PckfwN1DaznFWaNJFssLmzk1W+fgLxvtie1tLCVIFGMUYN953qBFjZZXEpg3KW+ZGV9+qnRWjvRLS0dmrjmiQ==}
+  /vellum-ai@0.3.11:
+    resolution: {integrity: sha512-aB0t5P/Osk4qErGRQ6B+yg36kSHAgBTurXNeugEsuEmrG0kcF9qHW3sb5ovl1sYh2xwWKE7VzDonfPvG5IIvLA==}
     dependencies:
       form-data: 4.0.0
       node-fetch: 2.7.0
