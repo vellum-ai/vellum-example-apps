@@ -1,5 +1,4 @@
 import { kv } from '@vercel/kv'
-import { StreamingTextResponse } from 'ai'
 import { VellumClient } from 'vellum-ai'
 import { ChatMessage as ChatMessageSerializer } from 'vellum-ai/serialization'
 import { serialization } from 'vellum-ai/core'
@@ -22,6 +21,19 @@ const requestBodySerializer = serialization.object({
   id: serialization.string(),
   messages: serialization.list(ChatMessageSerializer)
 })
+
+class StreamingTextResponse extends Response {
+  constructor(res: ReadableStream, init?: ResponseInit) {
+    super(res, {
+      ...init,
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        ...(init == null ? void 0 : init.headers)
+      }
+    })
+  }
+}
 
 export async function POST(req: Request) {
   const json = await req.json()
