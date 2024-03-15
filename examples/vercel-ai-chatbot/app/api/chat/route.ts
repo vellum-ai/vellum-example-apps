@@ -11,12 +11,7 @@ import { nanoid } from 'nanoid'
 export const runtime = 'edge'
 
 const vellum = new VellumClient({
-  apiKey: process.env.VELLUM_API_KEY!,
-  environment: {
-    default: 'http://127.0.0.1:8000',
-    documents: 'http://127.0.0.1:8000',
-    predict: 'http://127.0.0.1:8000'
-  }
+  apiKey: process.env.VELLUM_API_KEY!
 })
 
 const requestBodySerializer = serialization.object({
@@ -74,6 +69,8 @@ export async function POST(req: Request) {
     })
 
   if (!res.ok) {
+    // We need to improve the error message returned and not require users to wrap our responses with `ok`
+    // https://app.shortcut.com/vellum/story/2064
     return new Response(res.response.message, {
       status: res.response.statusCode
     })
