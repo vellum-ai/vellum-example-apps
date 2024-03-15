@@ -4,9 +4,10 @@ import { ChatMessage } from 'vellum-ai/api'
 
 export interface ChatList {
   messages: ChatMessage[]
+  reload?: (index: number) => Promise<void>
 }
 
-export function ChatList({ messages }: ChatList) {
+export function ChatList({ messages, reload }: ChatList) {
   if (!messages.length) {
     return null
   }
@@ -15,7 +16,10 @@ export function ChatList({ messages }: ChatList) {
     <div className="relative mx-auto max-w-2xl px-4">
       {messages.map((message, index) => (
         <div key={index}>
-          <ChatMessageComponent message={message} />
+          <ChatMessageComponent
+            message={message}
+            reload={async () => reload?.(index)}
+          />
           {index < messages.length - 1 && (
             <Separator className="my-4 md:my-8" />
           )}

@@ -18,7 +18,7 @@ export async function generateMetadata({
   const chat = await getSharedChat(params.id)
 
   return {
-    title: chat?.title.slice(0, 50) ?? 'Chat'
+    title: chat?.title ?? 'Chat'
   }
 }
 

@@ -14,6 +14,7 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 }
 
 export function Chat({ id, initialMessages, className }: ChatProps) {
+  console.log(id, initialMessages)
   const { messages, append, reload, stop, isLoading } = useVellumChat({
     initialMessages,
     chatId: id,
@@ -34,7 +35,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
         {messages.length ? (
           <>
-            <ChatList messages={messages} />
+            <ChatList messages={messages} reload={reload} />
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (
@@ -46,7 +47,6 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
         isLoading={isLoading}
         stop={stop}
         append={append}
-        reload={reload}
         messages={messages}
       />
     </>

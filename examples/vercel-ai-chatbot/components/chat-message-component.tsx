@@ -13,6 +13,7 @@ import { ChatMessage, ChatMessageContent } from 'vellum-ai/api'
 
 export interface ChatMessageProps {
   message: ChatMessage
+  reload?: () => Promise<void>
 }
 
 const serializeChatMessageContent = (content?: ChatMessageContent): string => {
@@ -33,12 +34,13 @@ ${JSON.stringify(content.value)}
   }
 }
 
-export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
+export function ChatMessageComponent({
+  message,
+  reload,
+  ...props
+}: ChatMessageProps) {
   return (
-    <div
-      className={cn('group relative mb-4 flex items-start md:-ml-12')}
-      {...props}
-    >
+    <div className={cn('relative mb-4 flex items-start md:-ml-12')} {...props}>
       <div
         className={cn(
           'flex size-8 shrink-0 select-none items-center justify-center rounded-md border shadow',
@@ -55,7 +57,7 @@ export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
           <IconOpenAI />
         )}
       </div>
-      <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
+      <div className="group flex-1 px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown
           className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
           remarkPlugins={[remarkGfm, remarkMath]}
@@ -97,7 +99,10 @@ export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
         >
           {serializeChatMessageContent(message.content)}
         </MemoizedReactMarkdown>
-        <ChatMessageActions message={message} />
+        <ChatMessageActions
+          message={message}
+          reload={message.role === 'USER' ? reload : undefined}
+        />
       </div>
     </div>
   )

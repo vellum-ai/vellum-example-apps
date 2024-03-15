@@ -6,6 +6,7 @@ import { kv } from '@vercel/kv'
 
 import { auth } from '@/auth'
 import { type Chat } from '@/lib/types'
+import { ChatMessage } from 'vellum-ai/api'
 
 export async function getChats(userId: string) {
   try {
@@ -36,7 +37,7 @@ export async function getChat(id: string, userId: string) {
   return chat
 }
 
-export async function addChat({ id, title }: { id: string; title: string }) {
+export async function addChat({ id, title, message }: { id: string; title: string, message: ChatMessage }) {
   const session = await auth()
 
   if (!session) {
@@ -49,8 +50,8 @@ export async function addChat({ id, title }: { id: string; title: string }) {
     title,
     id,
     createdAt: Date.now(),
-    userId: session.user.id,
-    messages: []
+    userId: String(session.user.id),
+    messages: [message]
   })
 
   // `score` is used to sort the ids within redis
@@ -137,6 +138,35 @@ export async function clearChats() {
 
   revalidatePath('/')
   return redirect('/')
+}
+
+export async function saveChatMessages({
+  id,
+  messages
+}: {
+  id: string
+  messages: ChatMessage[]
+}) {
+  const session = await auth()
+
+  if (!session) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
+  const uid = String(await kv.hget(`chat:${id}`, 'userId'))
+
+  if (uid !== session?.user?.id) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
+  await kv.hset(`chat:${id}`, {
+    messages,
+    id,
+  })
 }
 
 export async function getSharedChat(id: string) {

@@ -20,47 +20,19 @@ interface SidebarItemProps {
 }
 
 export function SidebarItem({ index, chat, children }: SidebarItemProps) {
-  const pathname = usePathname()
-
-  const isActive = pathname === `/chat/${chat.id}`
-  const [newChatId, setNewChatId] = useLocalStorage('newChatId', null)
-  const shouldAnimate = index === 0 && isActive && newChatId
-
-  const [showContent, setShowContent] = React.useState<boolean>(false)
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
+  // Next.js usePathname was throwing a null pointer error trying to access the context.
+  // Similar to https://github.com/vercel/next.js/issues/49355
+  const [isActive, setIsActive] = React.useState(false)
   React.useEffect(() => {
-    const hoverable = containerRef.current
-
-    const handleOver = () => {
-      setShowContent(true)
-    }
-
-    const handleOut = () => {
-      setShowContent(false)
-    }
-
-    if (hoverable) {
-      hoverable.addEventListener('pointerover', handleOver, {
-        passive: true
-      })
-      hoverable.addEventListener('pointerleave', handleOut, {
-        passive: true
-      })
-    }
-    return () => {
-      if (hoverable) {
-        hoverable.removeEventListener('pointerover', handleOver)
-        hoverable.removeEventListener('pointerleave', handleOut)
-      }
-    }
-  }, [])
+    if (typeof window === 'undefined') return
+    if (window.location.pathname.includes(chat.id)) setIsActive(true)
+  }, [chat.id])
 
   if (!chat.id) return null
 
   return (
     <motion.div
-      className="relative h-8"
+      className="group relative h-8"
       variants={{
         initial: {
           height: 0,
@@ -71,13 +43,10 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
           opacity: 1
         }
       }}
-      initial={shouldAnimate ? 'initial' : undefined}
-      animate={shouldAnimate ? 'animate' : undefined}
       transition={{
         duration: 0.25,
         ease: 'easeIn'
       }}
-      ref={containerRef}
     >
       <div className="absolute left-2 top-1 flex size-6 items-center justify-center">
         <IconMessage className="mr-2" />
@@ -95,45 +64,12 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
           title={chat.title}
         >
           <span className="truncate max-w-32">
-            {shouldAnimate ? (
-              chat.title.split('').map((character, index) => (
-                <motion.span
-                  key={index}
-                  variants={{
-                    initial: {
-                      opacity: 0,
-                      x: -100
-                    },
-                    animate: {
-                      opacity: 1,
-                      x: 0
-                    }
-                  }}
-                  initial={shouldAnimate ? 'initial' : undefined}
-                  animate={shouldAnimate ? 'animate' : undefined}
-                  transition={{
-                    duration: 0.25,
-                    ease: 'easeIn',
-                    delay: index * 0.05,
-                    staggerChildren: 0.05
-                  }}
-                  onAnimationComplete={() => {
-                    if (index === chat.title.length - 1) {
-                      setNewChatId(null)
-                    }
-                  }}
-                >
-                  {character}
-                </motion.span>
-              ))
-            ) : (
-              <span>{chat.title}</span>
-            )}
+            <span>{chat.title}</span>
           </span>
         </div>
       </Link>
       <div
-        className={cn('absolute right-2 top-1', showContent ? '' : 'hidden')}
+        className={'absolute right-2 top-1 group-hover:opacity-100 opacity-0'}
       >
         {children}
       </div>
