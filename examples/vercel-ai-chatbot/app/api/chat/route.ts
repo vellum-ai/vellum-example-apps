@@ -92,18 +92,11 @@ export async function POST(req: Request) {
             const stringOutputType = event.data.outputs?.find(
               (o): o is WorkflowOutput.String => o.type === 'STRING'
             )
-            await kv.hmset(`chat:${id}`, {
-              id,
-              createdAt: Date.now(),
-              userId,
+            await kv.hset(`chat:${id}`, {
               messages: messages.concat({
                 role: 'ASSISTANT' as const,
                 content: stringOutputType
               })
-            })
-            await kv.zadd(`user:chat:${userId}`, {
-              score: Date.now(),
-              member: `chat:${id}`
             })
           } else {
             const arrayOutputType = event.data.outputs?.find(
@@ -122,10 +115,7 @@ export async function POST(req: Request) {
                   id: nanoid()
                 }) + '\n'
               )
-              await kv.hmset(`chat:${id}`, {
-                id,
-                createdAt: Date.now(),
-                userId,
+              await kv.hset(`chat:${id}`, {
                 messages: messages.concat({
                   role: 'ASSISTANT' as const,
                   content: {
@@ -133,10 +123,6 @@ export async function POST(req: Request) {
                     value: functionCallItem.value
                   }
                 })
-              })
-              await kv.zadd(`user:chat:${userId}`, {
-                score: Date.now(),
-                member: `chat:${id}`
               })
             }
           }

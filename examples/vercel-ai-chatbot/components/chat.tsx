@@ -5,8 +5,6 @@ import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { EmptyScreen } from '@/components/empty-screen'
 import { ChatScrollAnchor } from '@/components/chat-scroll-anchor'
-import { toast } from 'react-hot-toast'
-import { usePathname, useRouter } from 'next/navigation'
 import { ChatMessage } from 'vellum-ai/api'
 import useVellumChat from '@/lib/hooks/use-vellum-chat'
 

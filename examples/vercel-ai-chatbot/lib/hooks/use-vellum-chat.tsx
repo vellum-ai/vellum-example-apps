@@ -1,3 +1,4 @@
+import { addChat } from '@/app/actions'
 import { nanoid } from 'nanoid'
 import { usePathname } from 'next/navigation'
 import React from 'react'
@@ -32,6 +33,20 @@ const useVellumChat = ({
   const triggerRequest = React.useCallback(
     async (request: { messages: ChatMessage[]; id: string }) => {
       setIsLoading(true)
+      if (!path.includes('chat')) {
+        const userMessage = request.messages.find(
+          m => m.role === 'USER' && m.content?.type === 'STRING'
+        )
+        const defaultChatTitle =
+          (userMessage?.content?.value as string)?.slice(0, 10) ?? 'New chat'
+
+        await addChat({
+          id,
+          title: defaultChatTitle
+        })
+        window.history.pushState({}, '', `/chat/${id}`)
+      }
+
       const abortController = new AbortController()
       abortControllerRef.current = abortController
       try {
@@ -163,9 +178,6 @@ const useVellumChat = ({
         }
       } else {
         setIsLoading(false)
-        if (!path.includes('chat')) {
-          window.history.pushState({}, '', `/chat/${id}`)
-        }
       }
     },
     [id, onFunctionCall, path]

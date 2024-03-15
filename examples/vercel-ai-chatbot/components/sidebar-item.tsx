@@ -22,11 +22,41 @@ interface SidebarItemProps {
 export function SidebarItem({ index, chat, children }: SidebarItemProps) {
   const pathname = usePathname()
 
-  const isActive = pathname === chat.path
+  const isActive = pathname === `/chat/${chat.id}`
   const [newChatId, setNewChatId] = useLocalStorage('newChatId', null)
   const shouldAnimate = index === 0 && isActive && newChatId
 
-  if (!chat?.id) return null
+  const [showContent, setShowContent] = React.useState<boolean>(false)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    const hoverable = containerRef.current
+
+    const handleOver = () => {
+      setShowContent(true)
+    }
+
+    const handleOut = () => {
+      setShowContent(false)
+    }
+
+    if (hoverable) {
+      hoverable.addEventListener('pointerover', handleOver, {
+        passive: true
+      })
+      hoverable.addEventListener('pointerleave', handleOut, {
+        passive: true
+      })
+    }
+    return () => {
+      if (hoverable) {
+        hoverable.removeEventListener('pointerover', handleOver)
+        hoverable.removeEventListener('pointerleave', handleOut)
+      }
+    }
+  }, [])
+
+  if (!chat.id) return null
 
   return (
     <motion.div
@@ -47,6 +77,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
         duration: 0.25,
         ease: 'easeIn'
       }}
+      ref={containerRef}
     >
       <div className="absolute left-2 top-1 flex size-6 items-center justify-center">
         <IconMessage className="mr-2" />
@@ -63,7 +94,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
           className="relative max-h-5 flex-1 select-none overflow-hidden text-ellipsis break-all"
           title={chat.title}
         >
-          <span className="whitespace-nowrap">
+          <span className="truncate max-w-32">
             {shouldAnimate ? (
               chat.title.split('').map((character, index) => (
                 <motion.span
@@ -101,7 +132,11 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
           </span>
         </div>
       </Link>
-      {isActive && <div className="absolute right-2 top-1">{children}</div>}
+      <div
+        className={cn('absolute right-2 top-1', showContent ? '' : 'hidden')}
+      >
+        {children}
+      </div>
     </motion.div>
   )
 }

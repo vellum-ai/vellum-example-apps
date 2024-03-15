@@ -7,11 +7,7 @@ import { kv } from '@vercel/kv'
 import { auth } from '@/auth'
 import { type Chat } from '@/lib/types'
 
-export async function getChats(userId?: string | null) {
-  if (!userId) {
-    return []
-  }
-
+export async function getChats(userId: string) {
   try {
     const pipeline = kv.pipeline()
     const chats: string[] = await kv.zrange(`user:chat:${userId}`, 0, -1, {
@@ -22,9 +18,9 @@ export async function getChats(userId?: string | null) {
       pipeline.hgetall(chat)
     }
 
-    const results = await pipeline.exec()
+    const results = await pipeline.exec<Chat[]>()
 
-    return results as Chat[]
+    return results
   } catch (error) {
     return []
   }
@@ -40,7 +36,36 @@ export async function getChat(id: string, userId: string) {
   return chat
 }
 
-export async function removeChat({ id, path }: { id: string; path: string }) {
+export async function addChat({ id, title }: { id: string; title: string }) {
+  const session = await auth()
+
+  if (!session) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
+  await kv.hset(`chat:${id}`, {
+    title,
+    id,
+    createdAt: Date.now(),
+    userId: session.user.id,
+    messages: []
+  })
+
+  // `score` is used to sort the ids within redis
+  // `member` points to what's sorted
+  // https://redis.io/commands/zadd
+  await kv.zadd(`user:chat:${session.user.id}`, {
+    score: Date.now(),
+    member: `chat:${id}`
+  })
+
+  revalidatePath('/')
+  return revalidatePath(`/chat/${id}`)
+}
+
+export async function editChat({ id, title }: { id: string; title: string }) {
   const session = await auth()
 
   if (!session) {
@@ -58,11 +83,34 @@ export async function removeChat({ id, path }: { id: string; path: string }) {
     }
   }
 
+  await kv.hset(`chat:${id}`, { title })
+
+  revalidatePath('/')
+  return revalidatePath(`/chat/${id}`)
+}
+
+export async function removeChat({ id }: { id: string }) {
+  const session = await auth()
+
+  if (!session) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
+  const uid = String(await kv.hget(`chat:${id}`, 'userId'))
+
+  if (uid !== session?.user?.id) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
   await kv.del(`chat:${id}`)
   await kv.zrem(`user:chat:${session.user.id}`, `chat:${id}`)
 
   revalidatePath('/')
-  return revalidatePath(path)
+  return revalidatePath(`/chat/${id}`)
 }
 
 export async function clearChats() {
@@ -118,7 +166,7 @@ export async function shareChat(id: string) {
     }
   }
 
-  await kv.hmset(`chat:${chat.id}`, chat)
+  await kv.hset(`chat:${chat.id}`, chat)
 
   return chat
 }
