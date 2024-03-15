@@ -52,6 +52,10 @@ export async function addChat({ id, title }: { id: string; title: string }) {
     userId: session.user.id,
     messages: []
   })
+
+  // `score` is used to sort the ids within redis
+  // `member` points to what's sorted
+  // https://redis.io/commands/zadd
   await kv.zadd(`user:chat:${session.user.id}`, {
     score: Date.now(),
     member: `chat:${id}`
@@ -94,7 +98,6 @@ export async function removeChat({ id }: { id: string }) {
     }
   }
 
-  //Convert uid to string for consistent comparison with session.user.id
   const uid = String(await kv.hget(`chat:${id}`, 'userId'))
 
   if (uid !== session?.user?.id) {
