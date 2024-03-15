@@ -1,5 +1,6 @@
 import { kv } from '@vercel/kv'
 import { VellumClient } from 'vellum-ai'
+import { VellumError as VellumHTTPError } from 'vellum-ai/errors'
 import { ChatMessage as ChatMessageSerializer } from 'vellum-ai/serialization'
 import { serialization } from 'vellum-ai/core'
 
@@ -10,7 +11,12 @@ import { nanoid } from 'nanoid'
 export const runtime = 'edge'
 
 const vellum = new VellumClient({
-  apiKey: process.env.VELLUM_API_KEY!
+  apiKey: process.env.VELLUM_API_KEY!,
+  environment: {
+    default: 'http://127.0.0.1:8000',
+    documents: 'http://127.0.0.1:8000',
+    predict: 'http://127.0.0.1:8000'
+  }
 })
 
 const requestBodySerializer = serialization.object({
@@ -42,17 +48,36 @@ export async function POST(req: Request) {
     })
   }
 
-  const res = await vellum.executeWorkflowStream({
-    workflowDeploymentName: 'vercel-chatbot-demo',
-    releaseTag: 'production',
-    inputs: [
-      {
-        type: 'CHAT_HISTORY',
-        value: messages,
-        name: 'messages'
+  const res = await vellum
+    .executeWorkflowStream({
+      workflowDeploymentName: 'vercel-chatbot-demo',
+      releaseTag: 'production',
+      inputs: [
+        {
+          type: 'CHAT_HISTORY',
+          value: messages,
+          name: 'messages'
+        }
+      ]
+    })
+    .then(stream => {
+      return {
+        ok: true as const,
+        stream
       }
-    ]
-  })
+    })
+    .catch(err => {
+      return {
+        ok: false as const,
+        response: err as VellumHTTPError
+      }
+    })
+
+  if (!res.ok) {
+    return new Response(res.response.message, {
+      status: res.response.statusCode
+    })
+  }
 
   const stream = new ReadableStream({
     async pull(controller) {
@@ -60,13 +85,17 @@ export async function POST(req: Request) {
       let isFunctionCall = false
       let startedStreaming = false
 
-      for await (const event of res) {
+      for await (const event of res.stream) {
         if (event.type !== 'WORKFLOW') {
           continue
         }
         if (event.data.state === 'REJECTED') {
-          controller.error(
-            `We failed to resolve the latest message. Here's why: ${JSON.stringify(event.data.error!)}`
+          controller.enqueue(
+            JSON.stringify({
+              state: 'REJECTED',
+              type: 'ERROR',
+              value: event.data.error
+            })
           )
           controller.close()
           break
