@@ -8,7 +8,6 @@ import {
   ChatMessage,
   ChatMessageContent,
   FulfilledFunctionCall,
-  FunctionCall,
   WorkflowResultEventOutputData
 } from 'vellum-ai/api'
 
@@ -22,7 +21,6 @@ const useVellumChat = ({
   onFunctionCall?: (functionCall: FulfilledFunctionCall) => Promise<unknown>
 }) => {
   const id = React.useMemo(() => chatId ?? nanoid(), [chatId])
-  const path = usePathname()
   const abortControllerRef = React.useRef<AbortController | null>()
   const [isLoading, setIsLoading] = React.useState(false)
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages)
@@ -34,7 +32,8 @@ const useVellumChat = ({
   const triggerRequest = React.useCallback(
     async (request: { messages: ChatMessage[]; id: string }) => {
       setIsLoading(true)
-      if (!path.includes('chat')) {
+      if (!window.location.pathname.includes('chat')) {
+        console.log('Adding chat...')
         const userMessage = request.messages.find(
           m => m.role === 'USER' && m.content?.type === 'STRING'
         )
@@ -187,7 +186,7 @@ const useVellumChat = ({
       }
       setIsLoading(false)
     },
-    [id, onFunctionCall, path]
+    [id, onFunctionCall]
   )
 
   const append = React.useCallback(
