@@ -19,7 +19,6 @@ export function SidebarItems({ chats }: SidebarItemsProps) {
     )
   }
 
-  console.log(chats)
   return (
     <AnimatePresence>
       {chats.map((chat, index) => (
