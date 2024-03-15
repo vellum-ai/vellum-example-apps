@@ -118,12 +118,17 @@ export async function POST(req: Request) {
             const stringOutputType = event.data.outputs?.find(
               (o): o is WorkflowOutput.String => o.type === 'STRING'
             )
-            await kv.hset(`chat:${id}`, {
-              messages: messages.concat({
-                role: 'ASSISTANT' as const,
-                content: stringOutputType
+            if (stringOutputType?.value) {
+              await kv.hset(`chat:${id}`, {
+                messages: messages.concat({
+                  role: 'ASSISTANT' as const,
+                  content: {
+                    type: 'STRING',
+                    value: stringOutputType?.value
+                  }
+                })
               })
-            })
+            }
           } else {
             const arrayOutputType = event.data.outputs?.find(
               (o): o is WorkflowOutput.Array => o.type === 'ARRAY'
