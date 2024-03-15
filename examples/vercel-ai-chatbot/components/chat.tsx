@@ -14,6 +14,7 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 }
 
 export function Chat({ id, initialMessages, className }: ChatProps) {
+  console.log(id, initialMessages)
   const { messages, append, reload, stop, isLoading } = useVellumChat({
     initialMessages,
     chatId: id,

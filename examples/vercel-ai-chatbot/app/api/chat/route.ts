@@ -7,6 +7,7 @@ import { serialization } from 'vellum-ai/core'
 import { auth } from '@/auth'
 import { WorkflowOutput } from 'vellum-ai/api'
 import { nanoid } from 'nanoid'
+import { getChats } from '@/app/actions'
 
 export const runtime = 'edge'
 
@@ -35,6 +36,7 @@ class StreamingTextResponse extends Response {
 export async function POST(req: Request) {
   const json = await req.json()
   const { id, messages } = await requestBodySerializer.parseOrThrow(json)
+
   const userId = (await auth())?.user.id
 
   if (!userId) {
@@ -45,7 +47,7 @@ export async function POST(req: Request) {
 
   const uid = String(await kv.hget(`chat:${id}`, 'userId'))
 
-  if (uid !== userId) {
+  if (uid !== String(userId)) {
     return new Response('Unauthorized', {
       status: 401
     })
