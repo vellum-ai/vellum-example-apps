@@ -6,6 +6,7 @@ import { kv } from '@vercel/kv'
 
 import { auth } from '@/auth'
 import { type Chat } from '@/lib/types'
+import { ChatMessage } from 'vellum-ai/api'
 
 export async function getChats(userId: string) {
   try {
@@ -137,6 +138,37 @@ export async function clearChats() {
 
   revalidatePath('/')
   return redirect('/')
+}
+
+export async function saveChatMessages({
+  id,
+  messages
+}: {
+  id: string
+  messages: ChatMessage[]
+}) {
+  const session = await auth()
+
+  if (!session) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
+  const uid = String(await kv.hget(`chat:${id}`, 'userId'))
+
+  if (uid !== session?.user?.id) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
+  await kv.hset(`chat:${id}`, {
+    messages,
+    id,
+  })
+
+  return revalidatePath(`/chat/${id}`)
 }
 
 export async function getSharedChat(id: string) {

@@ -26,41 +26,11 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
   const [newChatId, setNewChatId] = useLocalStorage('newChatId', null)
   const shouldAnimate = index === 0 && isActive && newChatId
 
-  const [showContent, setShowContent] = React.useState<boolean>(false)
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    const hoverable = containerRef.current
-
-    const handleOver = () => {
-      setShowContent(true)
-    }
-
-    const handleOut = () => {
-      setShowContent(false)
-    }
-
-    if (hoverable) {
-      hoverable.addEventListener('pointerover', handleOver, {
-        passive: true
-      })
-      hoverable.addEventListener('pointerleave', handleOut, {
-        passive: true
-      })
-    }
-    return () => {
-      if (hoverable) {
-        hoverable.removeEventListener('pointerover', handleOver)
-        hoverable.removeEventListener('pointerleave', handleOut)
-      }
-    }
-  }, [])
-
   if (!chat.id) return null
 
   return (
     <motion.div
-      className="relative h-8"
+      className="group relative h-8"
       variants={{
         initial: {
           height: 0,
@@ -77,7 +47,6 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
         duration: 0.25,
         ease: 'easeIn'
       }}
-      ref={containerRef}
     >
       <div className="absolute left-2 top-1 flex size-6 items-center justify-center">
         <IconMessage className="mr-2" />
@@ -133,7 +102,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
         </div>
       </Link>
       <div
-        className={cn('absolute right-2 top-1', showContent ? '' : 'hidden')}
+        className={'absolute right-2 top-1 group-hover:opacity-100 opacity-0'}
       >
         {children}
       </div>

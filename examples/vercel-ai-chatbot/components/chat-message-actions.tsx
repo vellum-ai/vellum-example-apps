@@ -1,18 +1,20 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { IconCheck, IconCopy } from '@/components/ui/icons'
+import { IconCheck, IconCopy, IconRefresh } from '@/components/ui/icons'
 import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { ChatMessage } from 'vellum-ai/api'
 
 interface ChatMessageActionsProps extends React.ComponentProps<'div'> {
   message: ChatMessage
+  reload?: () => Promise<void>
 }
 
 export function ChatMessageActions({
   message,
   className,
+  reload,
   ...props
 }: ChatMessageActionsProps) {
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
@@ -30,6 +32,12 @@ export function ChatMessageActions({
       )}
       {...props}
     >
+      {reload && (
+        <Button variant="ghost" size="icon" onClick={reload}>
+          <IconRefresh />
+          <span className="sr-only">Reload message</span>
+        </Button>
+      )}
       <Button variant="ghost" size="icon" onClick={onCopy}>
         {isCopied ? <IconCheck /> : <IconCopy />}
         <span className="sr-only">Copy message</span>

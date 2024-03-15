@@ -43,6 +43,14 @@ export async function POST(req: Request) {
     })
   }
 
+  const uid = String(await kv.hget(`chat:${id}`, 'userId'))
+
+  if (uid !== userId) {
+    return new Response('Unauthorized', {
+      status: 401
+    })
+  }
+
   const res = await vellum
     .executeWorkflowStream({
       workflowDeploymentName: 'vercel-chatbot-demo',
@@ -114,17 +122,7 @@ export async function POST(req: Request) {
           }
         }
         if (event.data.state === 'FULFILLED') {
-          if (!isFunctionCall) {
-            const stringOutputType = event.data.outputs?.find(
-              (o): o is WorkflowOutput.String => o.type === 'STRING'
-            )
-            await kv.hset(`chat:${id}`, {
-              messages: messages.concat({
-                role: 'ASSISTANT' as const,
-                content: stringOutputType
-              })
-            })
-          } else {
+          if (isFunctionCall) {
             const arrayOutputType = event.data.outputs?.find(
               (o): o is WorkflowOutput.Array => o.type === 'ARRAY'
             )
@@ -141,15 +139,6 @@ export async function POST(req: Request) {
                   id: nanoid()
                 }) + '\n'
               )
-              await kv.hset(`chat:${id}`, {
-                messages: messages.concat({
-                  role: 'ASSISTANT' as const,
-                  content: {
-                    type: 'FUNCTION_CALL',
-                    value: functionCallItem.value
-                  }
-                })
-              })
             }
           }
           controller.close()
