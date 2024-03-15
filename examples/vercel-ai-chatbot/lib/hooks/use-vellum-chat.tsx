@@ -1,4 +1,4 @@
-import { editChat } from '@/app/actions'
+import { addChat } from '@/app/actions'
 import { nanoid } from 'nanoid'
 import { usePathname } from 'next/navigation'
 import React from 'react'
@@ -34,15 +34,17 @@ const useVellumChat = ({
     async (request: { messages: ChatMessage[]; id: string }) => {
       setIsLoading(true)
       if (!path.includes('chat')) {
-        window.history.pushState({}, '', `/chat/${id}`)
-        await editChat({
+        const userMessage = request.messages.find(
+          m => m.role === 'USER' && m.content?.type === 'STRING'
+        )
+        const defaultChatTitle =
+          (userMessage?.content?.value as string)?.slice(0, 10) ?? 'New chat'
+
+        await addChat({
           id,
-          title:
-            (
-              request.messages.find(m => m.role === 'USER')?.content
-                ?.value as string
-            )?.slice(0, 20) ?? 'New chat'
+          title: defaultChatTitle
         })
+        window.history.pushState({}, '', `/chat/${id}`)
       }
 
       const abortController = new AbortController()

@@ -138,7 +138,7 @@ export function SidebarActions({ chat }: SidebarActionsProps) {
       <AlertDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Edit {chat.title}</AlertDialogTitle>
+            <AlertDialogTitle>Edit Chat</AlertDialogTitle>
           </AlertDialogHeader>
           <form
             onSubmit={e => {
@@ -174,7 +174,7 @@ export function SidebarActions({ chat }: SidebarActionsProps) {
             <AlertDialogCancel disabled={isEditPending}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction disabled={isEditPending} type="submit">
+            <AlertDialogAction disabled={isEditPending} type="submit" form={editFormId}>
               {isEditPending && <IconSpinner className="mr-2 animate-spin" />}
               Save
             </AlertDialogAction>

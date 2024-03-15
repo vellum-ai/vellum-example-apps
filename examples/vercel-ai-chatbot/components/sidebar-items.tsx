@@ -19,24 +19,22 @@ export function SidebarItems({ chats }: SidebarItemsProps) {
     )
   }
 
+  console.log(chats)
   return (
     <AnimatePresence>
-      {chats.map(
-        (chat, index) =>
-          chat && (
-            <motion.div
-              key={chat?.id}
-              exit={{
-                opacity: 0,
-                height: 0
-              }}
-            >
-              <SidebarItem index={index} chat={chat}>
-                <SidebarActions chat={chat} />
-              </SidebarItem>
-            </motion.div>
-          )
-      )}
+      {chats.map((chat, index) => (
+        <motion.div
+          key={chat.id}
+          exit={{
+            opacity: 0,
+            height: 0
+          }}
+        >
+          <SidebarItem index={index} chat={chat}>
+            <SidebarActions chat={chat} />
+          </SidebarItem>
+        </motion.div>
+      ))}
     </AnimatePresence>
   )
 }

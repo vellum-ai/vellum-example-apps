@@ -98,10 +98,6 @@ export async function POST(req: Request) {
                 content: stringOutputType
               })
             })
-            await kv.zadd(`user:chat:${userId}`, {
-              score: Date.now(),
-              member: `chat:${id}`
-            })
           } else {
             const arrayOutputType = event.data.outputs?.find(
               (o): o is WorkflowOutput.Array => o.type === 'ARRAY'
@@ -127,10 +123,6 @@ export async function POST(req: Request) {
                     value: functionCallItem.value
                   }
                 })
-              })
-              await kv.zadd(`user:chat:${userId}`, {
-                score: Date.now(),
-                member: `chat:${id}`
               })
             }
           }

@@ -94,7 +94,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
           className="relative max-h-5 flex-1 select-none overflow-hidden text-ellipsis break-all"
           title={chat.title}
         >
-          <span className="whitespace-nowrap">
+          <span className="truncate max-w-32">
             {shouldAnimate ? (
               chat.title.split('').map((character, index) => (
                 <motion.span

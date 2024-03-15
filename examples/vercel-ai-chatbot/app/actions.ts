@@ -36,6 +36,31 @@ export async function getChat(id: string, userId: string) {
   return chat
 }
 
+export async function addChat({ id, title }: { id: string; title: string }) {
+  const session = await auth()
+
+  if (!session) {
+    return {
+      error: 'Unauthorized'
+    }
+  }
+
+  await kv.hset(`chat:${id}`, {
+    title,
+    id,
+    createdAt: Date.now(),
+    userId: session.user.id,
+    messages: []
+  })
+  await kv.zadd(`user:chat:${session.user.id}`, {
+    score: Date.now(),
+    member: `chat:${id}`
+  })
+
+  revalidatePath('/')
+  return revalidatePath(`/chat/${id}`)
+}
+
 export async function editChat({ id, title }: { id: string; title: string }) {
   const session = await auth()
 
