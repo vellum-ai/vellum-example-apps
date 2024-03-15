@@ -2,6 +2,7 @@ import { addChat } from '@/app/actions'
 import { nanoid } from 'nanoid'
 import { usePathname } from 'next/navigation'
 import React from 'react'
+import { toast } from 'react-hot-toast'
 import {
   ArrayChatMessageContentItem,
   ChatMessage,
@@ -96,6 +97,13 @@ const useVellumChat = ({
           ) as WorkflowResultEventOutputData[]
 
           parsedChunkValueArray.forEach(parsedChunkValue => {
+            if (
+              parsedChunkValue.state === 'REJECTED' &&
+              parsedChunkValue.type === 'ERROR'
+            ) {
+              throw new Error(parsedChunkValue.value?.message)
+            }
+
             if (!parsedChunkValue.id) {
               return
             }
@@ -153,32 +161,31 @@ const useVellumChat = ({
             }
           })
         }
-      } catch (error) {
-        console.error(error)
-      }
 
-      const mostRecentMessage = messagesRef.current.slice(-1)[0]
-      if (mostRecentMessage.content?.type === 'FUNCTION_CALL') {
-        const functionCall = mostRecentMessage.content.value
-        if (onFunctionCall) {
-          const response = await onFunctionCall(functionCall)
-          const newMessages = messagesRef.current.concat({
-            role: 'FUNCTION',
-            content: {
-              type: 'STRING',
-              value: JSON.stringify(response)
-            },
-            source: functionCall.id
-          })
-          setMessages(newMessages)
-          await triggerRequest({
-            messages: newMessages,
-            id: request.id
-          })
+        const mostRecentMessage = messagesRef.current.slice(-1)[0]
+        if (mostRecentMessage.content?.type === 'FUNCTION_CALL') {
+          const functionCall = mostRecentMessage.content.value
+          if (onFunctionCall) {
+            const response = await onFunctionCall(functionCall)
+            const newMessages = messagesRef.current.concat({
+              role: 'FUNCTION',
+              content: {
+                type: 'STRING',
+                value: JSON.stringify(response)
+              },
+              source: functionCall.id
+            })
+            setMessages(newMessages)
+            await triggerRequest({
+              messages: newMessages,
+              id: request.id
+            })
+          }
         }
-      } else {
-        setIsLoading(false)
+      } catch (error) {
+        toast.error((error as Error).message)
       }
+      setIsLoading(false)
     },
     [id, onFunctionCall, path]
   )
