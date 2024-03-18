@@ -151,7 +151,11 @@ export async function POST(req: Request) {
                   role: 'ASSISTANT' as const,
                   content: {
                     type: 'FUNCTION_CALL',
-                    value: functionCallItem.value
+                    value: {
+                      id: functionCallItem.value.id,
+                      name: functionCallItem.value.name,
+                      arguments: functionCallItem.value.arguments
+                    }
                   }
                 })
               })
