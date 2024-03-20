@@ -159,6 +159,7 @@ const useVellumChat = ({
           })
         }
 
+        console.log("mostRecentMessage", messagesRef.current.slice(-1))
         const mostRecentMessage = messagesRef.current.slice(-1)[0]
         if (mostRecentMessage.content?.type === 'FUNCTION_CALL') {
           const functionCall = mostRecentMessage.content.value
