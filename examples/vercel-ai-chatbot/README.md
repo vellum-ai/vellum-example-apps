@@ -1,10 +1,10 @@
-<a href="https://chat.vercel.ai/">
-  <img alt="Vellum Next.js-ready AI chatbot." src="https://chat.vercel.ai/opengraph-image.png">
-  <h1 align="center">Vellum Next.js AI Chatbot</h1>
+<a href="https://vellum-example-apps-six.vercel.app">
+  <img alt="Vellum AI Chatbot on Next.js" src="https://vellum-example-apps-six.vercel.app/opengraph-image.png">
+  <h1 align="center">Vellum AI Chatbot on Next.js</h1>
 </a>
 
 <p align="center">
-  An open-source AI chatbot app template built with Vellum, Next.js, the Vercel AI SDK, and Vercel KV. Cloned from https://github.com/vercel/ai-chatbot.git, adapted to support Vellum workflows.
+  An open-source AI chatbot app template built with Vellum, Next.js, the Vercel AI SDK, and Vercel KV. Cloned from https://github.com/vercel/ai-chatbot.git, adapted to support Vellum prompts and workflows.
 </p>
 
 <p align="center">
@@ -17,24 +17,21 @@
 
 ## Features
 
+- Support for all major Model Providers, powered by [Vellum](https://vellum.ai)
 - [Next.js](https://nextjs.org) App Router
 - React Server Components (RSCs), Suspense, and Server Actions
-- [Vercel AI SDK](https://sdk.vercel.ai/docs) for streaming chat UI
-- Support for all major Model Providers, powered by [Vellum](https://vellum.ai)
 - [shadcn/ui](https://ui.shadcn.com)
   - Styling with [Tailwind CSS](https://tailwindcss.com)
   - [Radix UI](https://radix-ui.com) for headless component primitives
   - Icons from [Phosphor Icons](https://phosphoricons.com)
-- Chat History, rate limiting, and session storage with [Vercel KV](https://vercel.com/storage/kv)
 - [NextAuth.js](https://github.com/nextauthjs/next-auth) for authentication
+- Chat History, rate limiting, and session storage with [Vercel KV](https://vercel.com/storage/kv)
 
 ## Deploy Your Own
 
-You can deploy your own version of the Vellum Next.js AI Chatbot to Vercel with one click:
+You can deploy your own version of the Vellum NextJS AI Chatbot to Vercel with one click:
 
-<!-- TODO: Get a clone link specific to this repo -->
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?demo-title=Next.js+Chat&demo-description=A+full-featured%2C+hackable+Next.js+AI+chatbot+built+by+Vercel+Labs&demo-url=https%3A%2F%2Fchat.vercel.ai%2F&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4aVPvWuTmBvzM5cEdRdqeW%2F4234f9baf160f68ffb385a43c3527645%2FCleanShot_2023-06-16_at_17.09.21.png&project-name=Next.js+Chat&repository-name=nextjs-chat&repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fai-chatbot&from=templates&skippable-integrations=1&env=OPENAI_API_KEY%2CAUTH_GITHUB_ID%2CAUTH_GITHUB_SECRET%2CAUTH_SECRET&envDescription=How+to+get+these+env+vars&envLink=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fai-chatbot%2Fblob%2Fmain%2F.env.example&teamCreateStatus=hidden&stores=[{"type":"kv"}])
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvellum-ai%2Fvellum-example-apps%2Ftree%2Fmain%2Fexamples%2Fvercel-ai-chatbot&env=OPENAI_API_KEY,AUTH_GITHUB_ID,AUTH_GITHUB_SECRET,AUTH_SECRET&envDescription=For%20more%20on%20how%20to%20set%20these%20environment%20variables%2C%20follow%20the%20link%20below&envLink=https%3A%2F%2Fgithub.com%2Fvellum-ai%2Fvellum-example-apps%2Fblob%2Fmain%2Fexamples%2Fvercel-ai-chatbot%2F.env.example&project-name=vellum-ai-chatbot&repository-name=vellum-ai-chatbot&demo-title=Vellum%20AI%20Chatbot%20on%20Next.js&demo-description=An%20open-source%20AI%20chatbot%20app%20template%20built%20with%20Vellum%2C%20Next.js%2C%20the%20Vercel%20AI%20SDK%2C%20and%20Vercel%20KV.&demo-url=https%3A%2F%2Fvellum-example-apps-six.vercel.app)
 
 ### Creating a KV Database Instance
 

@@ -2,7 +2,7 @@ import { Separator } from '@/components/ui/separator'
 import { ChatMessageComponent } from '@/components/chat-message-component'
 import { ChatMessage } from 'vellum-ai/api'
 import { useMemo } from 'react'
-import { IconOpenAI } from './ui/icons'
+import { IconVellum } from './ui/icons'
 
 export interface ChatList {
   messages: ChatMessage[]
@@ -34,7 +34,7 @@ export function ChatList({ messages, isLoading = false }: ChatList) {
                 'flex size-8 shrink-0 select-none items-center justify-center rounded-md border shadow'
               }
             >
-              <IconOpenAI />
+              <IconVellum />
             </div>
             <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden italic">
               Typing...
