@@ -14,21 +14,20 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 }
 
 export function Chat({ id, initialMessages, className }: ChatProps) {
-  const { messages, append, reload, stop, isLoading, isPrompting } =
-    useVellumChat({
-      initialMessages,
-      chatId: id,
-      async onFunctionCall(functionCall) {
-        // Replace this with your own function call
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        switch (functionCall.name) {
-          case 'get_current_weather':
-            return { temperature: 75, metric: 'degrees', unit: 'F' }
-          default:
-            return { notFound: true }
-        }
+  const { messages, append, reload, stop, isLoading } = useVellumChat({
+    initialMessages,
+    chatId: id,
+    async onFunctionCall(functionCall) {
+      // Replace this with your own function call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      switch (functionCall.name) {
+        case 'get_current_weather':
+          return { temperature: 75, metric: 'degrees', unit: 'F' }
+        default:
+          return { notFound: true }
       }
-    })
+    }
+  })
 
   return (
     <>
