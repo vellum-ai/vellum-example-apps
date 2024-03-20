@@ -23,6 +23,7 @@ const useVellumChat = ({
   const id = React.useMemo(() => chatId ?? nanoid(), [chatId])
   const abortControllerRef = React.useRef<AbortController | null>()
   const [isLoading, setIsLoading] = React.useState(false)
+  const [isPrompting, setIsPrompting] = React.useState(false)
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages)
   const messagesRef = React.useRef<ChatMessage[]>(messages)
   React.useEffect(() => {
@@ -219,7 +220,8 @@ const useVellumChat = ({
     append,
     reload,
     stop,
-    isLoading
+    isLoading,
+    isPrompting
   }
 }
 
