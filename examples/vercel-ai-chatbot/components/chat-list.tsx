@@ -6,10 +6,10 @@ import { IconOpenAI } from './ui/icons'
 
 export interface ChatList {
   messages: ChatMessage[]
-  isLoading: boolean
+  isLoading?: boolean
 }
 
-export function ChatList({ messages, isLoading }: ChatList) {
+export function ChatList({ messages, isLoading = false }: ChatList) {
   const lastMessage = useMemo(() => messages.slice(-1)[0], [messages])
   if (!messages.length) {
     return null
