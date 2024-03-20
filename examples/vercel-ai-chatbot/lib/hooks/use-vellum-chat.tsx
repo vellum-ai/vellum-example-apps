@@ -1,6 +1,5 @@
 import { addChat } from '@/app/actions'
 import { nanoid } from 'nanoid'
-import { usePathname } from 'next/navigation'
 import React from 'react'
 import { toast } from 'react-hot-toast'
 import {
@@ -33,12 +32,11 @@ const useVellumChat = ({
     async (request: { messages: ChatMessage[]; id: string }) => {
       setIsLoading(true)
       if (!window.location.pathname.includes('chat')) {
-        console.log('Adding chat...')
         const userMessage = request.messages.find(
           m => m.role === 'USER' && m.content?.type === 'STRING'
         )
         const defaultChatTitle =
-          (userMessage?.content?.value as string)?.slice(0, 10) ?? 'New chat'
+          (userMessage?.content?.value as string)?.slice(0, 50) ?? 'New chat'
 
         await addChat({
           id,
@@ -202,8 +200,23 @@ const useVellumChat = ({
   )
 
   const reload = React.useCallback(() => {
+    const lastAssistantMessageIndex = messagesRef.current.findLastIndex(
+      msg => msg.role === 'ASSISTANT'
+    )
+    if (lastAssistantMessageIndex === -1) {
+      return triggerRequest({
+        messages: messagesRef.current,
+        id
+      })
+    }
+
+    const messagesToReload = messagesRef.current.slice(
+      0,
+      lastAssistantMessageIndex
+    )
+    setMessages(messagesToReload)
     return triggerRequest({
-      messages: messagesRef.current,
+      messages: messagesToReload,
       id
     })
   }, [id, triggerRequest])
