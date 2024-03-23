@@ -33,6 +33,23 @@ ${JSON.stringify(content.value)}
   }
 }
 
+const serializeFunctionContent = (content?: ChatMessageContent): string => {
+  if (content?.type !== 'STRING') return '';
+  try {
+    const parsed = JSON.parse(content.value)
+    if (parsed.error) {
+      return `Error (${parsed.status}): ${parsed.message}`
+    }
+    return `\`\`\`json
+${JSON.stringify(parsed, null, 2)}
+\`\`\``;
+  } catch (e) {
+    return `\`\`\`json
+${content.value}
+\`\`\``;
+  }
+}
+
 export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
   return (
     <div
@@ -95,7 +112,9 @@ export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
             }
           }}
         >
-          {serializeChatMessageContent(message.content)}
+          {message.role === 'FUNCTION'
+            ? serializeFunctionContent(message.content)
+            : serializeChatMessageContent(message.content)}
         </MemoizedReactMarkdown>
         <ChatMessageActions message={message} />
       </div>

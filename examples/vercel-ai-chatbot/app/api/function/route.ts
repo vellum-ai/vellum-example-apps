@@ -8,9 +8,13 @@ export async function POST(req: Request) {
   // Alternatively, you can setup a separate route for each function
   switch (functionCall.name) {
     case 'get_current_weather':
-      return fetch(
-        `http://api.weatherapi.com/v1/current.json?key=${process.env.WEATHER_API_KEY}&q=${functionCall.arguments.location}&aqi=no`
-      )
+      const url = `https://api.weatherapi.com/v1/current.json?key=${process.env.WEATHER_API_KEY}&q=${functionCall.arguments.location}&aqi=no`
+      const response = await fetch(url, {
+        headers: { Accept: 'application/json' }
+      })
+      return new Response(await response.text(), {
+        status: response.status
+      })
     default:
       return new Response(`Function ${functionCall.name} not found`, {
         status: 404

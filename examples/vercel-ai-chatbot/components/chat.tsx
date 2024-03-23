@@ -18,12 +18,10 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
     initialMessages,
     chatId: id,
     async onFunctionCall(functionCall) {
-      console.log('functionCall', functionCall)
-      const functionCallResponse = await fetch('/api/tool', {
+      const functionCallResponse = await fetch('/api/function', {
         method: 'POST',
         body: JSON.stringify(functionCall)
       })
-      console.log('functionCallResponse', functionCallResponse)
       if (functionCallResponse.status !== 200) {
         return {
           error: true,
