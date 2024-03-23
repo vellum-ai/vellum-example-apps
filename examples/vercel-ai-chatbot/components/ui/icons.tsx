@@ -99,7 +99,7 @@ function IconVellum({ className, ...props }: React.ComponentProps<'svg'>) {
       className={cn('size-4', className)}
     >
       <title>Vellum icon</title>
-      <g clip-path="url(#clip0_643_17651)">
+      <g clipPath="url(#clip0_643_17651)">
         <path
           d="M11.5703 8.87891L16 18.4941L20.4121 8.87891H24.8594L15.9648 27.1777L7.14062 8.87891H11.5703Z"
           fill="#000000"

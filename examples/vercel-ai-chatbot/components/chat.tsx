@@ -18,14 +18,18 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
     initialMessages,
     chatId: id,
     async onFunctionCall(functionCall) {
-      // Replace this with your own function call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      switch (functionCall.name) {
-        case 'get_current_weather':
-          return { temperature: 75, metric: 'degrees', unit: 'F' }
-        default:
-          return { notFound: true }
+      const functionCallResponse = await fetch('/api/function', {
+        method: 'POST',
+        body: JSON.stringify(functionCall)
+      })
+      if (functionCallResponse.status !== 200) {
+        return {
+          error: true,
+          status: functionCallResponse.status,
+          message: await functionCallResponse.text()
+        }
       }
+      return await functionCallResponse.json()
     }
   })
 
@@ -38,7 +42,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (
-          <EmptyScreen append={append} />
+          <EmptyScreen />
         )}
       </div>
       <ChatPanel
