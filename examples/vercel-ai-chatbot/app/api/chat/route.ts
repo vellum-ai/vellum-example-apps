@@ -77,6 +77,10 @@ export async function POST(req: Request) {
 
   const stream = new ReadableStream({
     async pull(controller) {
+      const encoder = new TextEncoder()
+      const emit = (event: unknown) =>
+        controller.enqueue(encoder.encode(JSON.stringify(event) + '\n'))
+
       // TODO: Remove this hack - need some changes on Vellum side
       let isFunctionCall = false
       let startedStreaming = false
@@ -86,13 +90,11 @@ export async function POST(req: Request) {
           continue
         }
         if (event.data.state === 'REJECTED') {
-          controller.enqueue(
-            JSON.stringify({
-              state: 'REJECTED',
-              type: 'ERROR',
-              value: event.data.error
-            })
-          )
+          emit({
+            state: 'REJECTED',
+            type: 'ERROR',
+            value: event.data.error
+          })
           controller.close()
           break
         }
@@ -109,7 +111,7 @@ export async function POST(req: Request) {
             }
           }
           if (!isFunctionCall && output.name == 'final-output') {
-            controller.enqueue(JSON.stringify(output) + '\n')
+            emit(output)
           }
         }
         if (event.data.state === 'FULFILLED') {
@@ -137,14 +139,12 @@ export async function POST(req: Request) {
               functionCallItem?.type === 'FUNCTION_CALL' &&
               functionCallItem?.value.state === 'FULFILLED'
             ) {
-              controller.enqueue(
-                JSON.stringify({
-                  state: 'FULFILLED',
-                  value: functionCallItem.value,
-                  type: 'FUNCTION_CALL',
-                  id: nanoid()
-                }) + '\n'
-              )
+              emit({
+                state: 'FULFILLED',
+                value: functionCallItem.value,
+                type: 'FUNCTION_CALL',
+                id: nanoid()
+              })
               await kv.hset(`chat:${id}`, {
                 messages: messages.concat({
                   role: 'ASSISTANT' as const,
