@@ -1,5 +1,4 @@
 import { addChat } from '@/app/actions'
-import { nanoid } from 'nanoid'
 import React from 'react'
 import { toast } from 'react-hot-toast'
 import {
@@ -9,21 +8,24 @@ import {
   FulfilledFunctionCall,
   WorkflowResultEventOutputData
 } from 'vellum-ai/api'
+import { nanoid } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
 
 const useVellumChat = ({
   initialMessages = [],
-  chatId,
+  initialChatId,
   onFunctionCall
 }: {
   initialMessages?: ChatMessage[]
-  chatId?: string
+  initialChatId?: string
   onFunctionCall?: (functionCall: FulfilledFunctionCall) => Promise<unknown>
 }) => {
-  const id = React.useMemo(() => chatId ?? nanoid(), [chatId])
+  const id = React.useMemo(() => initialChatId ?? nanoid(), [initialChatId])
   const abortControllerRef = React.useRef<AbortController | null>()
   const [isLoading, setIsLoading] = React.useState(false)
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages)
   const messagesRef = React.useRef<ChatMessage[]>(messages)
+  const router = useRouter()
   React.useEffect(() => {
     messagesRef.current = messages
   }, [messages])
@@ -31,19 +33,6 @@ const useVellumChat = ({
   const triggerRequest = React.useCallback(
     async (request: { messages: ChatMessage[]; id: string }) => {
       setIsLoading(true)
-      if (!window.location.pathname.includes('chat')) {
-        const userMessage = request.messages.find(
-          m => m.role === 'USER' && m.content?.type === 'STRING'
-        )
-        const defaultChatTitle =
-          (userMessage?.content?.value as string)?.slice(0, 50) ?? 'New chat'
-
-        await addChat({
-          id,
-          title: defaultChatTitle
-        })
-        window.history.pushState({}, '', `/chat/${id}`)
-      }
 
       const abortController = new AbortController()
       abortControllerRef.current = abortController
@@ -184,19 +173,39 @@ const useVellumChat = ({
       }
       setIsLoading(false)
     },
-    [id, onFunctionCall]
+    [onFunctionCall]
   )
 
   const append = React.useCallback(
-    (message: ChatMessage) => {
+    async (value: string) => {
+      const message: ChatMessage = {
+        content: {
+          type: 'STRING',
+          value
+        },
+        role: 'USER'
+      }
+
+      if (!window.location.pathname.includes('chat')) {
+        await addChat({
+          id,
+          value
+        })
+        window.history.pushState({}, '', `/chat/${id}`)
+      }
       const newMessages = messagesRef.current.concat(message)
       setMessages(newMessages)
-      return triggerRequest({
+      await triggerRequest({
         messages: newMessages,
         id
       })
+
+      if (!initialChatId) {
+        router.push(`/chat/${id}`)
+        router.refresh()
+      }
     },
-    [id, triggerRequest]
+    [id, initialChatId, router, triggerRequest]
   )
 
   const reload = React.useCallback(() => {
@@ -232,7 +241,8 @@ const useVellumChat = ({
     append,
     reload,
     stop,
-    isLoading
+    isLoading,
+    id
   }
 }
 

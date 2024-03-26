@@ -10,13 +10,13 @@ import useVellumChat from '@/lib/hooks/use-vellum-chat'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: ChatMessage[]
-  id?: string
+  initialChatId?: string
 }
 
-export function Chat({ id, initialMessages, className }: ChatProps) {
-  const { messages, append, reload, stop, isLoading } = useVellumChat({
+export function Chat({ initialChatId, initialMessages, className }: ChatProps) {
+  const { messages, append, reload, stop, isLoading, id } = useVellumChat({
     initialMessages,
-    chatId: id,
+    initialChatId,
     async onFunctionCall(functionCall) {
       const functionCallResponse = await fetch('/api/function', {
         method: 'POST',

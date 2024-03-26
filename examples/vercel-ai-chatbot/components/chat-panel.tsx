@@ -12,7 +12,7 @@ import { ChatMessage } from 'vellum-ai/api'
 export interface ChatPanelProps {
   isLoading: boolean
   stop: () => void
-  append: (message: ChatMessage) => Promise<void>
+  append: (value: string) => Promise<void>
   reload: () => Promise<void>
   messages: ChatMessage[]
   id?: string
@@ -80,13 +80,7 @@ export function ChatPanel({
         <div className="px-4 py-2 space-y-4 border-t shadow-lg bg-background sm:rounded-t-xl sm:border md:py-4">
           <PromptForm
             onSubmit={async value => {
-              await append({
-                content: {
-                  type: 'STRING',
-                  value
-                },
-                role: 'USER'
-              })
+              await append(value)
             }}
             isLoading={isLoading}
           />

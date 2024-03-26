@@ -36,7 +36,7 @@ export async function getChat(id: string, userId: string) {
   return chat
 }
 
-export async function addChat({ id, title }: { id: string; title: string }) {
+export async function addChat({ id, value }: { id: string; value: string }) {
   const session = await auth()
 
   if (!session) {
@@ -45,12 +45,22 @@ export async function addChat({ id, title }: { id: string; title: string }) {
     }
   }
 
+  const userMessage = {
+    content: {
+      type: 'STRING',
+      value
+    },
+    role: 'USER'
+  }
+  const defaultChatTitle =
+    (userMessage?.content?.value as string)?.slice(0, 50) ?? 'New chat'
+
   await kv.hset(`chat:${id}`, {
-    title,
+    title: defaultChatTitle,
     id,
     createdAt: Date.now(),
     userId: session.user.id,
-    messages: []
+    messages: [userMessage]
   })
 
   // `score` is used to sort the ids within redis

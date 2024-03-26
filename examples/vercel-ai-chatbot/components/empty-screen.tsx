@@ -14,8 +14,7 @@ export function EmptyScreen() {
         </p>
         <p className="leading-normal text-muted-foreground">
           You can start a conversation by entering a message below. The chatbot
-          is configured to answer questions about the weather and will ignore
-          other inquiries.
+          is designed to answer questions about {"Vellum's"} Help Center.
         </p>
       </div>
     </div>

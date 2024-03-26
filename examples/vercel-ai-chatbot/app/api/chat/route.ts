@@ -45,13 +45,12 @@ export async function POST(req: Request) {
 
   const res = await vellum
     .executeWorkflowStream({
-      workflowDeploymentName: 'vercel-chatbot-demo',
-      releaseTag: 'production',
+      workflowDeploymentName: 'trust-center-bot',
       inputs: [
         {
           type: 'CHAT_HISTORY',
           value: messages,
-          name: 'messages'
+          name: 'chat_history'
         }
       ]
     })
@@ -109,7 +108,7 @@ export async function POST(req: Request) {
               isFunctionCall = true
             }
           }
-          if (!isFunctionCall && output.name == 'text-output') {
+          if (!isFunctionCall && output.name == 'final-output') {
             controller.enqueue(JSON.stringify(output) + '\n')
           }
         }
