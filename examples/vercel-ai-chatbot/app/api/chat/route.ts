@@ -7,6 +7,7 @@ import { serialization } from 'vellum-ai/core'
 import { auth } from '@/auth'
 import { WorkflowOutput } from 'vellum-ai/api'
 import { nanoid } from 'nanoid'
+import { UINT32_SIZE } from '@/lib/constants'
 
 export const runtime = 'edge'
 
@@ -78,8 +79,17 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async pull(controller) {
       const encoder = new TextEncoder()
-      const emit = (event: unknown) =>
-        controller.enqueue(encoder.encode(JSON.stringify(event) + '\n'))
+
+      // Emit a JSON event to the client
+      // We use a content type strategy where we first encode the length of the strinigified event
+      // before encoding the event itself
+      const emit = (event: unknown) => {
+        const jsonString = JSON.stringify(event)
+        const lengthBuffer = new Uint8Array(UINT32_SIZE)
+        new DataView(lengthBuffer.buffer).setUint32(0, jsonString.length, false)
+        controller.enqueue(Buffer.from(lengthBuffer.buffer))
+        controller.enqueue(encoder.encode(jsonString))
+      }
 
       // TODO: Remove this hack - need some changes on Vellum side
       let isFunctionCall = false

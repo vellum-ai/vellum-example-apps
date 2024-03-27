@@ -10,6 +10,14 @@ import {
 } from 'vellum-ai/api'
 import { nanoid } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import { UINT32_SIZE } from '@/lib/constants'
+
+function concatBuffers(a: Uint8Array, b: Uint8Array) {
+  const result = new Uint8Array(a.length + b.length)
+  result.set(a, 0)
+  result.set(b, a.length)
+  return result
+}
 
 const useVellumChat = ({
   initialMessages = [],
@@ -34,6 +42,74 @@ const useVellumChat = ({
     async (request: { messages: ChatMessage[]; id: string }) => {
       setIsLoading(true)
 
+      const outputs: Record<string, ChatMessageContent | null> = {}
+      const outputIds: string[] = []
+      const onOutputEvent = (
+        parsedChunkValue: WorkflowResultEventOutputData
+      ) => {
+        if (
+          parsedChunkValue.state === 'REJECTED' &&
+          parsedChunkValue.type === 'ERROR'
+        ) {
+          throw new Error(parsedChunkValue.value?.message)
+        }
+
+        if (!parsedChunkValue.id) {
+          return
+        }
+
+        if (parsedChunkValue.state === 'INITIATED') {
+          outputIds.push(parsedChunkValue.id)
+          outputs[parsedChunkValue.id] = null
+        } else if (parsedChunkValue.state === 'STREAMING') {
+          const existingOutput = outputs[parsedChunkValue.id]
+          if (existingOutput == null) {
+            outputs[parsedChunkValue.id] = {
+              type: 'STRING',
+              value: parsedChunkValue.delta as string
+            }
+          } else if (existingOutput.type === 'STRING') {
+            existingOutput.value += parsedChunkValue.delta as string
+          }
+        } else if (parsedChunkValue.state === 'FULFILLED') {
+          if (
+            parsedChunkValue.type === 'FUNCTION_CALL' &&
+            parsedChunkValue.value &&
+            parsedChunkValue.value.state === 'FULFILLED'
+          ) {
+            outputIds.push(parsedChunkValue.id)
+            const { state, ...value } = parsedChunkValue.value
+            if (state === 'FULFILLED') {
+              outputs[parsedChunkValue.id] = {
+                type: 'FUNCTION_CALL',
+                value
+              }
+            }
+          }
+        }
+
+        const contentOutputs = outputIds
+          .map(id => outputs[id])
+          .filter(
+            (output): output is ArrayChatMessageContentItem => output !== null
+          )
+        if (contentOutputs.length > 0) {
+          const assistantContent =
+            contentOutputs.length === 1
+              ? contentOutputs[0]
+              : {
+                  type: 'ARRAY' as const,
+                  value: contentOutputs
+                }
+          setMessages(
+            request.messages.concat({
+              role: 'ASSISTANT',
+              content: assistantContent
+            })
+          )
+        }
+      }
+
       const abortController = new AbortController()
       abortControllerRef.current = abortController
       try {
@@ -51,11 +127,11 @@ const useVellumChat = ({
         if (!response.body) {
           throw new Error('No response body')
         }
-        const reader = response.body.getReader()
 
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = new Uint8Array()
         let resultChunk: ReadableStreamReadResult<Uint8Array> | null = null
-        const outputs: Record<string, ChatMessageContent | null> = {}
-        const outputIds: string[] = []
         while (!resultChunk?.done) {
           if (abortController.signal.aborted) {
             break
@@ -67,85 +143,25 @@ const useVellumChat = ({
             }
             throw e
           })
-          if (!resultChunk?.value) {
+          if (resultChunk?.done || !resultChunk) {
             break
           }
 
-          const decoder = new TextDecoder('utf-8')
-          const resultChunkValueString = decoder.decode(resultChunk.value)
-          const cleanedChunkValueString = resultChunkValueString
-            .split(/[\n\r]+/)
-            .map(s => s.trim())
-            .filter(s => s !== '')
-            .join(', ')
-          const parsedChunkValueArray = JSON.parse(
-            `[${cleanedChunkValueString}]`
-          ) as WorkflowResultEventOutputData[]
-
-          parsedChunkValueArray.forEach(parsedChunkValue => {
-            if (
-              parsedChunkValue.state === 'REJECTED' &&
-              parsedChunkValue.type === 'ERROR'
-            ) {
-              throw new Error(parsedChunkValue.value?.message)
+          buffer = concatBuffers(buffer, resultChunk.value)
+          while (buffer.length >= 4) {
+            const eventLength = new DataView(buffer.buffer).getUint32(0, false)
+            if (buffer.length < eventLength + UINT32_SIZE) {
+              break
             }
 
-            if (!parsedChunkValue.id) {
-              return
-            }
+            const eventEncoded = buffer.subarray(
+              UINT32_SIZE,
+              UINT32_SIZE + eventLength
+            )
+            buffer = buffer.slice(UINT32_SIZE + eventLength)
 
-            if (parsedChunkValue.state === 'INITIATED') {
-              outputIds.push(parsedChunkValue.id)
-              outputs[parsedChunkValue.id] = null
-            } else if (parsedChunkValue.state === 'STREAMING') {
-              const existingOutput = outputs[parsedChunkValue.id]
-              if (existingOutput == null) {
-                outputs[parsedChunkValue.id] = {
-                  type: 'STRING',
-                  value: parsedChunkValue.delta as string
-                }
-              } else if (existingOutput.type === 'STRING') {
-                existingOutput.value += parsedChunkValue.delta as string
-              }
-            } else if (parsedChunkValue.state === 'FULFILLED') {
-              if (
-                parsedChunkValue.type === 'FUNCTION_CALL' &&
-                parsedChunkValue.value &&
-                parsedChunkValue.value.state === 'FULFILLED'
-              ) {
-                outputIds.push(parsedChunkValue.id)
-                const { state, ...value } = parsedChunkValue.value
-                if (state === 'FULFILLED') {
-                  outputs[parsedChunkValue.id] = {
-                    type: 'FUNCTION_CALL',
-                    value
-                  }
-                }
-              }
-            }
-
-            const contentOutputs = outputIds
-              .map(id => outputs[id])
-              .filter(
-                (output): output is ArrayChatMessageContentItem =>
-                  output !== null
-              )
-            if (contentOutputs.length > 0) {
-              const assistantContent =
-                contentOutputs.length === 1
-                  ? contentOutputs[0]
-                  : {
-                      type: 'ARRAY' as const,
-                      value: contentOutputs
-                    }
-              setMessages(
-                request.messages.concat({
-                  role: 'ASSISTANT',
-                  content: assistantContent
-                })
-              )
-            }
-          })
+            onOutputEvent(JSON.parse(decoder.decode(eventEncoded)))
+          }
         }
 
         const mostRecentMessage = messagesRef.current.slice(-1)[0]
