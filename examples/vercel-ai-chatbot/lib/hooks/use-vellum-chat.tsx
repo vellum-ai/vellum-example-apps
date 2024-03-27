@@ -10,6 +10,7 @@ import {
 } from 'vellum-ai/api'
 import { nanoid } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import { UINT32_SIZE } from '@/lib/constants'
 
 function concatBuffers(a: Uint8Array, b: Uint8Array) {
   const result = new Uint8Array(a.length + b.length)
@@ -149,12 +150,15 @@ const useVellumChat = ({
           buffer = concatBuffers(buffer, resultChunk.value)
           while (buffer.length >= 4) {
             const eventLength = new DataView(buffer.buffer).getUint32(0, false)
-            if (buffer.length < eventLength + 4) {
+            if (buffer.length < eventLength + UINT32_SIZE) {
               break
             }
 
-            const eventEncoded = buffer.subarray(4, 4 + eventLength)
-            buffer = buffer.slice(4 + eventLength)
+            const eventEncoded = buffer.subarray(
+              UINT32_SIZE,
+              UINT32_SIZE + eventLength
+            )
+            buffer = buffer.slice(UINT32_SIZE + eventLength)
 
             onOutputEvent(JSON.parse(decoder.decode(eventEncoded)))
           }
