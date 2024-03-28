@@ -5,14 +5,19 @@ import { ChatMessage as ChatMessageSerializer } from 'vellum-ai/serialization'
 import { serialization } from 'vellum-ai/core'
 
 import { auth } from '@/auth'
-import { WorkflowOutput } from 'vellum-ai/api'
+import { ChatMessage, WorkflowOutput } from 'vellum-ai/api'
 import { nanoid } from 'nanoid'
 import { UINT32_SIZE } from '@/lib/constants'
 
 export const runtime = 'edge'
 
 const vellum = new VellumClient({
-  apiKey: process.env.VELLUM_API_KEY!
+  apiKey: process.env.VELLUM_API_KEY!,
+  environment: {
+    default: 'http://127.0.0.1:8000',
+    documents: 'http://127.0.0.1:8000',
+    predict: 'http://127.0.0.1:8000'
+  }
 })
 
 const requestBodySerializer = serialization.object({
@@ -100,10 +105,21 @@ export async function POST(req: Request) {
           continue
         }
         if (event.data.state === 'REJECTED') {
+          const newChatMessage: ChatMessage = {
+            role: 'ASSISTANT' as const,
+            content: {
+              type: 'STRING',
+              value: event.data.error?.message as string
+            },
+            source: event.executionId
+          }
           emit({
-            state: 'REJECTED',
-            type: 'ERROR',
-            value: event.data.error
+            isComplete: true,
+            newChatMessage,
+            executionId: event.executionId
+          })
+          await kv.hset(`chat:${id}`, {
+            messages: messages.concat(newChatMessage)
           })
           controller.close()
           break
@@ -120,8 +136,24 @@ export async function POST(req: Request) {
               isFunctionCall = true
             }
           }
-          if (!isFunctionCall && output.name == 'final-output') {
-            emit(output)
+          if (
+            !isFunctionCall &&
+            output.name == 'final-output' &&
+            output.state === 'STREAMING'
+          ) {
+            const newChatMessage: ChatMessage = {
+              role: 'ASSISTANT' as const,
+              content: {
+                type: 'STRING',
+                value: event.data.error?.message as string
+              },
+              source: event.executionId
+            }
+            emit({
+              newChatMessage,
+              executionId: event.executionId,
+              isComplete: false
+            })
           }
         }
         if (event.data.state === 'FULFILLED') {
@@ -136,7 +168,8 @@ export async function POST(req: Request) {
                   content: {
                     type: 'STRING',
                     value: stringOutputType?.value
-                  }
+                  },
+                  source: event.executionId
                 })
               })
             }
@@ -150,10 +183,13 @@ export async function POST(req: Request) {
               functionCallItem?.value.state === 'FULFILLED'
             ) {
               emit({
-                state: 'FULFILLED',
-                value: functionCallItem.value,
-                type: 'FUNCTION_CALL',
-                id: nanoid()
+                output: {
+                  state: 'FULFILLED',
+                  value: functionCallItem.value,
+                  type: 'FUNCTION_CALL',
+                  id: nanoid()
+                },
+                executionId: event.executionId
               })
               await kv.hset(`chat:${id}`, {
                 messages: messages.concat({
@@ -165,7 +201,8 @@ export async function POST(req: Request) {
                       name: functionCallItem.value.name,
                       arguments: functionCallItem.value.arguments
                     }
-                  }
+                  },
+                  source: event.executionId
                 })
               })
             }
