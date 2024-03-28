@@ -53,12 +53,12 @@ export function UserMenu({ user }: UserMenuProps) {
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <a
-              href="https://vercel.com"
+              href="https://vellum.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-between w-full text-xs"
             >
-              Vercel Homepage
+              Vellum Homepage
               <IconExternalLink className="size-3 ml-auto" />
             </a>
           </DropdownMenuItem>
