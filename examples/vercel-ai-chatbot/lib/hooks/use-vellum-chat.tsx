@@ -44,6 +44,7 @@ const useVellumChat = ({
 
       const outputs: Record<string, ChatMessageContent | null> = {}
       const outputIds: string[] = []
+      const executionId = { current: nanoid() }
       const onOutputEvent = (
         parsedChunkValue: WorkflowResultEventOutputData
       ) => {
@@ -51,6 +52,15 @@ const useVellumChat = ({
           parsedChunkValue.state === 'REJECTED' &&
           parsedChunkValue.type === 'ERROR'
         ) {
+          setMessages(
+            request.messages.concat({
+              role: 'ASSISTANT',
+              content: {
+                type: 'STRING',
+                value: parsedChunkValue.value?.message as string
+              }
+            })
+          )
           throw new Error(parsedChunkValue.value?.message)
         }
 
@@ -61,6 +71,7 @@ const useVellumChat = ({
         if (parsedChunkValue.state === 'INITIATED') {
           outputIds.push(parsedChunkValue.id)
           outputs[parsedChunkValue.id] = null
+          executionId.current = parsedChunkValue.value as string
         } else if (parsedChunkValue.state === 'STREAMING') {
           const existingOutput = outputs[parsedChunkValue.id]
           if (existingOutput == null) {

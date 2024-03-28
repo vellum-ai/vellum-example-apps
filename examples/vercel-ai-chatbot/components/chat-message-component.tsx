@@ -10,6 +10,12 @@ import { MemoizedReactMarkdown } from '@/components/markdown'
 import { IconVellum, IconUser, IconGitHub } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
 import { ChatMessage, ChatMessageContent } from 'vellum-ai/api'
+import Link from 'next/link'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 
 export interface ChatMessageProps {
   message: ChatMessage
@@ -34,7 +40,7 @@ ${JSON.stringify(content.value)}
 }
 
 const serializeFunctionContent = (content?: ChatMessageContent): string => {
-  if (content?.type !== 'STRING') return '';
+  if (content?.type !== 'STRING') return ''
   try {
     const parsed = JSON.parse(content.value)
     if (parsed.error) {
@@ -42,11 +48,11 @@ const serializeFunctionContent = (content?: ChatMessageContent): string => {
     }
     return `\`\`\`json
 ${JSON.stringify(parsed, null, 2)}
-\`\`\``;
+\`\`\``
   } catch (e) {
     return `\`\`\`json
 ${content.value}
-\`\`\``;
+\`\`\``
   }
 }
 
@@ -68,6 +74,23 @@ export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
           <IconUser />
         ) : message.role === 'FUNCTION' ? (
           <IconGitHub />
+        ) : message.role === 'ASSISTANT' ? (
+          message.source ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`https://app.vellum.ai/deployments/workflows/f772d315-6db1-4fb0-a5b6-e316ae5418b9/executions/${message.source}`}
+                  target="_blank"
+                  style={{ cursor: 'pointer' }}
+                >
+                  <IconVellum />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>See Execution On Vellum</TooltipContent>
+            </Tooltip>
+          ) : (
+            <IconVellum />
+          )
         ) : (
           <IconVellum />
         )}
