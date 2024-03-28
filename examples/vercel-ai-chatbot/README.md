@@ -1,10 +1,10 @@
-<a href="https://vellum-example-apps-six.vercel.app">
-  <img alt="Vellum AI Chatbot on Next.js" src="https://vellum-example-apps-six.vercel.app/opengraph-image.png">
+<a href="https://chatbot.demo.vellum.ai">
+  <img alt="Vellum AI Chatbot on Next.js" src="https://chatbot.demo.vellum.ai/opengraph-image.png">
   <h1 align="center">Vellum AI Chatbot on Next.js</h1>
 </a>
 
 <p align="center">
-  An open-source AI chatbot app template built with Vellum, Next.js, the Vercel AI SDK, and Vercel KV. Cloned from https://github.com/vercel/ai-chatbot.git, adapted to support Vellum prompts and workflows.
+  An open-source AI chatbot app template built with Vellum, Next.js, and deployed on Vercel. Cloned from https://github.com/vercel/ai-chatbot.git, adapted to support Vellum prompts and workflows.
 </p>
 
 <p align="center">
@@ -60,7 +60,7 @@ Your app template should now be running on [localhost:3000](http://localhost:300
 
 This library is created by [Vercel](https://vercel.com) and [Next.js](https://nextjs.org) team members, with contributions from:
 
+- Vellum - [Vellum](https://vellum.ai)
 - Jared Palmer ([@jaredpalmer](https://twitter.com/jaredpalmer)) - [Vercel](https://vercel.com)
 - Shu Ding ([@shuding\_](https://twitter.com/shuding_)) - [Vercel](https://vercel.com)
 - shadcn ([@shadcn](https://twitter.com/shadcn)) - [Vercel](https://vercel.com)
-- Vellum - [Vellum](https://vellum.ai)
