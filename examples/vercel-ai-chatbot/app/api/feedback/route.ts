@@ -8,10 +8,14 @@ export async function POST(req: Request) {
   const json = await req.json()
   const { messageId, quality } = json as { messageId: string; quality: number }
 
-  await vellum.submitWorkflowExecutionActuals({
-    externalId: messageId,
-    actuals: [{ quality, outputKey: 'final-output', outputType: 'STRING' }]
-  })
+  try {
+    await vellum.submitWorkflowExecutionActuals({
+      executionId: messageId,
+      actuals: [{ quality, outputKey: 'final-output', outputType: 'STRING' }]
+    })
+  } catch (error) {
+    return new Response((error as Error).message, { status: 500 })
+  }
 
-  return new Response('', { status: 204 })
+  return new Response('', { status: 200 })
 }

@@ -44,11 +44,9 @@ export async function POST(req: Request) {
     })
   }
 
-  const messageId = nanoid()
   const res = await vellum
     .executeWorkflowStream({
       workflowDeploymentName: 'trust-center-bot',
-      externalId: messageId,
       inputs: [
         {
           type: 'CHAT_HISTORY',
@@ -134,7 +132,7 @@ export async function POST(req: Request) {
             if (stringOutputType?.value) {
               await kv.hset(`chat:${id}`, {
                 messages: messages.concat({
-                  source: messageId,
+                  source: event.executionId,
                   role: 'ASSISTANT' as const,
                   content: {
                     type: 'STRING',
@@ -147,7 +145,7 @@ export async function POST(req: Request) {
             const arrayOutputType = event.data.outputs?.find(
               (o): o is WorkflowOutput.Array => o.type === 'ARRAY'
             )
-            const functionCallItem = arrayOutputType?.value[0]
+            const functionCallItem = arrayOutputType?.value?.[0]
             if (
               functionCallItem?.type === 'FUNCTION_CALL' &&
               functionCallItem?.value.state === 'FULFILLED'
@@ -160,7 +158,7 @@ export async function POST(req: Request) {
               })
               await kv.hset(`chat:${id}`, {
                 messages: messages.concat({
-                  source: messageId,
+                  source: event.executionId,
                   role: 'ASSISTANT' as const,
                   content: {
                     type: 'FUNCTION_CALL',
