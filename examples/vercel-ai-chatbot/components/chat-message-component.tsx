@@ -10,6 +10,7 @@ import { MemoizedReactMarkdown } from '@/components/markdown'
 import { IconVellum, IconUser, IconGitHub } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
 import { ChatMessage, ChatMessageContent } from 'vellum-ai/api'
+import { ChatMessageFeedbackDialog } from './chat-message-feedback-dialog'
 
 export interface ChatMessageProps {
   message: ChatMessage
@@ -69,7 +70,7 @@ export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
         ) : message.role === 'FUNCTION' ? (
           <IconGitHub />
         ) : (
-          <IconVellum />
+          <ChatMessageFeedbackDialog message={message} />
         )}
       </div>
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
