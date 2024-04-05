@@ -96,8 +96,8 @@ dependencies:
     specifier: ^5.1.1
     version: 5.1.1
   vellum-ai:
-    specifier: ^0.3.11
-    version: 0.3.11
+    specifier: ^0.3.15
+    version: 0.3.15(constructs@10.3.0)
   zod:
     specifier: ^3.22.4
     version: 3.22.4
@@ -1692,6 +1692,18 @@ packages:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
     dev: false
 
+  /cdktf@0.20.6(constructs@10.3.0):
+    resolution: {integrity: sha512-WoEpZu29SYIDdAPIyCyjz6mvw7L+2XBul5NEC3W/B7PLdg/OvfJqWoGkCJibqTEGy9r69R5u+BptAbmCGGf3iQ==}
+    peerDependencies:
+      constructs: ^10.0.25
+    dependencies:
+      constructs: 10.3.0
+    dev: false
+    bundledDependencies:
+      - archiver
+      - json-stable-stringify
+      - semver
+
   /chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
@@ -1789,6 +1801,11 @@ packages:
   /concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
     dev: true
+
+  /constructs@10.3.0:
+    resolution: {integrity: sha512-vbK8i3rIb/xwZxSpTjz3SagHn1qq9BChLEfy5Hf6fB3/2eFbrwt2n9kHwQcS0CPTRBesreeAcsJfMq2229FnbQ==}
+    engines: {node: '>= 16.14.0'}
+    dev: false
 
   /cookie@0.6.0:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
@@ -5006,14 +5023,16 @@ packages:
       sade: 1.8.1
     dev: false
 
-  /vellum-ai@0.3.11:
-    resolution: {integrity: sha512-aB0t5P/Osk4qErGRQ6B+yg36kSHAgBTurXNeugEsuEmrG0kcF9qHW3sb5ovl1sYh2xwWKE7VzDonfPvG5IIvLA==}
+  /vellum-ai@0.3.15(constructs@10.3.0):
+    resolution: {integrity: sha512-mqIxpDgbfM9XAmNVWn4lZ/mi0WuDBQ3/reNrv0bhBICGmaF8tqQeG00Rntk5qgx9dgSmMr0xPVXqNflXD5NQVQ==}
     dependencies:
+      cdktf: 0.20.6(constructs@10.3.0)
       form-data: 4.0.0
       node-fetch: 2.7.0
       qs: 6.11.2
       url-join: 4.0.1
     transitivePeerDependencies:
+      - constructs
       - encoding
     dev: false
 
