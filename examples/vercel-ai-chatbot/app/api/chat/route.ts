@@ -8,6 +8,7 @@ import { auth } from '@/auth'
 import { WorkflowOutput } from 'vellum-ai/api'
 import { nanoid } from 'nanoid'
 import { UINT32_SIZE } from '@/lib/constants'
+import { cdktfIndex } from '@/workspace/searchIndexes'
 
 export const runtime = 'edge'
 
@@ -43,6 +44,12 @@ export async function POST(req: Request) {
       status: 401
     })
   }
+
+  const searchResults = await vellum.search({
+    indexName: cdktfIndex.name,
+    query: 'cdktf'
+  })
+  console.log(searchResults)
 
   const res = await vellum
     .executeWorkflowStream({

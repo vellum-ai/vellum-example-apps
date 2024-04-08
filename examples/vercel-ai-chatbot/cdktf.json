@@ -1,0 +1,6 @@
+{
+  "language": "typescript",
+  "app": "ts-node infrastructure.ts",
+  "output": "dist",
+  "projectId": "4712c8a3-f350-4dd7-a681-6a9da3169f3b"
+}
