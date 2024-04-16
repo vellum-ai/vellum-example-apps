@@ -29,7 +29,25 @@
 
 ## Deploy Your Own
 
-You can deploy your own version of the Vellum NextJS AI Chatbot to Vercel with one click:
+Check out our onboarding video below for a step-by-step guide for how to set up your own Vellum-powered chatbot!
+
+[![Watch the video](https://cdn.loom.com/sessions/thumbnails/ae4d43f775754ebbbcead815fea2b064.png)](https://www.loom.com/share/ae4d43f775754ebbbcead815fea2b064)
+
+The step-by-step guide is additionally outlined below.
+
+### Setup your Workflow on Vellum
+
+Navigate to the [Vellum Workflows](https://app.vellum.ai/workflow-sandboxes) tab to get started on creating your own workflow. Be sure to deploy the workflow once you have something you're ready to share.
+
+Then, navigate to the [API Keys](https://app.vellum.ai/api-keys) tab and generate your own Vellum API Key at the bottom of the page.
+
+### Setup Github Apps for Authentication
+
+Navigate to the [OAuth Apps](https://github.com/settings/developers) tab in your GitHub developer settings to create an OAuth App. This demo uses GitHub authentication to authenticate users to the chatbot so that users could save historical conversations. Create one for dev and have the callback URL pointed to `http://localhost:3000/api/auth/callback/github`. Copy the client id and client secret that are generated.
+
+### Deploy to Vercel
+
+You can deploy your own version of the Vellum AI Chatbot to Vercel by clicking the button below:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvellum-ai%2Fvellum-example-apps%2Ftree%2Fmain%2Fexamples%2Fvercel-ai-chatbot&env=VELLUM_API_KEY,AUTH_GITHUB_ID,AUTH_GITHUB_SECRET,AUTH_SECRET&envDescription=For%20more%20on%20how%20to%20set%20these%20environment%20variables%2C%20follow%20the%20link%20below&envLink=https%3A%2F%2Fgithub.com%2Fvellum-ai%2Fvellum-example-apps%2Fblob%2Fmain%2Fexamples%2Fvercel-ai-chatbot%2F.env.example&project-name=vellum-ai-chatbot&repository-name=vellum-ai-chatbot&demo-title=Vellum%20AI%20Chatbot%20on%20Next.js&demo-description=An%20open-source%20AI%20chatbot%20app%20template%20built%20with%20Vellum%2C%20Next.js%2C%20the%20Vercel%20AI%20SDK%2C%20and%20Vercel%20KV.&demo-url=https%3A%2F%2Fvellum-example-apps-six.vercel.app)
 
@@ -39,7 +57,11 @@ Follow the steps outlined in the [quick start guide](https://vercel.com/docs/sto
 
 Remember to update your environment variables (`KV_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `KV_REST_API_READ_ONLY_TOKEN`) in the `.env` file with the appropriate credentials provided during the KV database setup.
 
-## Running locally
+### Adding your Workflow
+
+Navigate to `/app/api/chat/route.ts` and edit the name of the workflow to point to the name you have deployed in Vellum.
+
+### Running locally
 
 You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
 
@@ -54,13 +76,14 @@ pnpm install
 pnpm dev
 ```
 
-Your app template should now be running on [localhost:3000](http://localhost:3000/).
+Your app template should now be running on [localhost:3000](http://localhost:3000/). Try typing in a message!
+
+### Push to production
+
+Commit your changes and push back up to main. Vercel should automatically initiate a new deployment upon noticing a new commit on `main`.
+
+Take note of the domain that is hosting your chatbot. Navigate back to GitHub and create a new GitHub app that will be used for production. This time, set the callback url to `[URL FROM VERCEL]/api/auth/callback/github`. As before, save the client id and client secret, but this time set it to the vercel deployment's variables _only_. Redeploy the chatbot to now have a working end-to-end Vellum-backed chatbot in production!
 
 ## Authors
 
-This library is created by [Vercel](https://vercel.com) and [Next.js](https://nextjs.org) team members, with contributions from:
-
-- Vellum - [Vellum](https://vellum.ai)
-- Jared Palmer ([@jaredpalmer](https://twitter.com/jaredpalmer)) - [Vercel](https://vercel.com)
-- Shu Ding ([@shuding\_](https://twitter.com/shuding_)) - [Vercel](https://vercel.com)
-- shadcn ([@shadcn](https://twitter.com/shadcn)) - [Vercel](https://vercel.com)
+This template is maintained by the [Vellum](https://vellum.ai) team. To inquire about using Vellum for your LLM development, reach out for a [demo today](https://www.vellum.ai/landing-pages/request-demo)!
