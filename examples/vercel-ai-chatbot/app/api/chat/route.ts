@@ -120,14 +120,15 @@ export async function POST(req: Request) {
               isFunctionCall = true
             }
           }
-          if (!isFunctionCall && output.name == 'final-output') {
+          if (!isFunctionCall && output.name == 'answer') {
             emit(output)
           }
         }
         if (event.data.state === 'FULFILLED') {
           if (!isFunctionCall) {
             const stringOutputType = event.data.outputs?.find(
-              (o): o is WorkflowOutput.String => o.type === 'STRING'
+              (o): o is WorkflowOutput.String =>
+                o.type === 'STRING' && o.name === 'answer'
             )
             if (stringOutputType?.value) {
               await kv.hset(`chat:${id}`, {
@@ -148,7 +149,7 @@ export async function POST(req: Request) {
             const functionCallItem = arrayOutputType?.value?.[0]
             if (
               functionCallItem?.type === 'FUNCTION_CALL' &&
-              functionCallItem?.value.state === 'FULFILLED'
+              functionCallItem?.value?.state === 'FULFILLED'
             ) {
               emit({
                 state: 'FULFILLED',
