@@ -5,7 +5,7 @@ import {
   ArrayChatMessageContentItem,
   ChatMessage,
   ChatMessageContent,
-  FulfilledFunctionCall,
+  FunctionCall,
   WorkflowResultEventOutputData
 } from 'vellum-ai/api'
 import { nanoid } from '@/lib/utils'
@@ -26,7 +26,7 @@ const useVellumChat = ({
 }: {
   initialMessages?: ChatMessage[]
   initialChatId?: string
-  onFunctionCall?: (functionCall: FulfilledFunctionCall) => Promise<unknown>
+  onFunctionCall?: (functionCall: FunctionCall) => Promise<unknown>
 }) => {
   const id = React.useMemo(() => initialChatId ?? nanoid(), [initialChatId])
   const abortControllerRef = React.useRef<AbortController | null>()
