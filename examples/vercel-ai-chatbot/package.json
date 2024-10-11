@@ -42,7 +42,7 @@
     "react-textarea-autosize": "^8.5.3",
     "remark-gfm": "^3.0.1",
     "remark-math": "^5.1.1",
-    "vellum-ai": "^0.6.0",
+    "vellum-ai": "^0.8.21",
     "zod": "^3.22.4"
   },
   "devDependencies": {
