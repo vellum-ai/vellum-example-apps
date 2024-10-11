@@ -6,7 +6,6 @@ import { serialization } from 'vellum-ai/core'
 
 import { auth } from '@/auth'
 import {
-  WorkflowOutput,
   WorkflowOutputArray,
   WorkflowOutputString
 } from 'vellum-ai/api'
