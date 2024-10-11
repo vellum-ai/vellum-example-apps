@@ -85,6 +85,14 @@ const useVellumChat = ({
                 value
               }
             }
+          } else if (
+            parsedChunkValue.type === 'STRING' &&
+            !outputs[parsedChunkValue.id]
+          ) {
+            outputs[parsedChunkValue.id] = {
+              type: 'STRING',
+              value: parsedChunkValue.value as string
+            }
           }
         }
 

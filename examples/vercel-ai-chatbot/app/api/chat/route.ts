@@ -5,7 +5,10 @@ import { ChatMessage as ChatMessageSerializer } from 'vellum-ai/serialization'
 import { serialization } from 'vellum-ai/core'
 
 import { auth } from '@/auth'
-import { WorkflowOutput } from 'vellum-ai/api'
+import {
+  WorkflowOutputArray,
+  WorkflowOutputString
+} from 'vellum-ai/api'
 import { nanoid } from 'nanoid'
 import { UINT32_SIZE } from '@/lib/constants'
 
@@ -127,7 +130,7 @@ export async function POST(req: Request) {
         if (event.data.state === 'FULFILLED') {
           if (!isFunctionCall) {
             const stringOutputType = event.data.outputs?.find(
-              (o): o is WorkflowOutput.String =>
+              (o): o is WorkflowOutputString =>
                 o.type === 'STRING' && o.name === 'answer'
             )
             if (stringOutputType?.value) {
@@ -144,7 +147,7 @@ export async function POST(req: Request) {
             }
           } else {
             const arrayOutputType = event.data.outputs?.find(
-              (o): o is WorkflowOutput.Array => o.type === 'ARRAY'
+              (o): o is WorkflowOutputArray => o.type === 'ARRAY'
             )
             const functionCallItem = arrayOutputType?.value?.[0]
             if (
