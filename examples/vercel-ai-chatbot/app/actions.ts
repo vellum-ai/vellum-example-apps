@@ -6,6 +6,7 @@ import { kv } from '@vercel/kv'
 
 import { auth } from '@/auth'
 import { type Chat } from '@/lib/types'
+import { Vellum, VellumClient } from 'vellum-ai'
 
 export async function getChats(userId: string) {
   try {
@@ -36,7 +37,15 @@ export async function getChat(id: string, userId: string) {
   return chat
 }
 
-export async function addChat({ id, value }: { id: string; value: string }) {
+export async function addChat({
+  id,
+  value,
+  workflowDeploymentId
+}: {
+  id: string
+  value: string
+  workflowDeploymentId: string
+}) {
   const session = await auth()
 
   if (!session) {
@@ -60,7 +69,8 @@ export async function addChat({ id, value }: { id: string; value: string }) {
     id,
     createdAt: Date.now(),
     userId: session.user.id,
-    messages: [userMessage]
+    messages: [userMessage],
+    workflowDeploymentId
   })
 
   // `score` is used to sort the ids within redis
@@ -179,4 +189,24 @@ export async function shareChat(id: string) {
   await kv.hset(`chat:${chat.id}`, chat)
 
   return chat
+}
+
+export async function getDeployments() {
+  const client = new VellumClient({
+    apiKey: process.env.VELLUM_API_KEY ?? ''
+  })
+  const { results } = await client.workflowDeployments.list()
+  if (!results) {
+    return []
+  }
+
+  // Filter out deployments that don't have a chat history input variable and a single string output variable
+  return results.filter(
+    deployment =>
+      deployment.inputVariables.some(
+        variable => variable.type === 'CHAT_HISTORY'
+      ) &&
+      deployment.outputVariables.filter(variable => variable.type === 'STRING')
+        .length >= 1
+  )
 }

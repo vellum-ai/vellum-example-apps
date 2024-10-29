@@ -14,6 +14,7 @@ import { ChatMessageFeedbackDialog } from './chat-message-feedback-dialog'
 
 export interface ChatMessageProps {
   message: ChatMessage
+  workflowDeploymentId: string
 }
 
 const serializeChatMessageContent = (content?: ChatMessageContent): string => {
@@ -35,7 +36,7 @@ ${JSON.stringify(content.value)}
 }
 
 const serializeFunctionContent = (content?: ChatMessageContent): string => {
-  if (content?.type !== 'STRING') return '';
+  if (content?.type !== 'STRING') return ''
   try {
     const parsed = JSON.parse(content.value)
     if (parsed.error) {
@@ -43,15 +44,19 @@ const serializeFunctionContent = (content?: ChatMessageContent): string => {
     }
     return `\`\`\`json
 ${JSON.stringify(parsed, null, 2)}
-\`\`\``;
+\`\`\``
   } catch (e) {
     return `\`\`\`json
 ${content.value}
-\`\`\``;
+\`\`\``
   }
 }
 
-export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
+export function ChatMessageComponent({
+  message,
+  workflowDeploymentId,
+  ...props
+}: ChatMessageProps) {
   return (
     <div
       className={cn('group relative mb-4 flex items-start md:-ml-12')}
@@ -70,7 +75,10 @@ export function ChatMessageComponent({ message, ...props }: ChatMessageProps) {
         ) : message.role === 'FUNCTION' ? (
           <IconGitHub />
         ) : (
-          <ChatMessageFeedbackDialog message={message} />
+          <ChatMessageFeedbackDialog
+            message={message}
+            workflowDeploymentId={workflowDeploymentId}
+          />
         )}
       </div>
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">

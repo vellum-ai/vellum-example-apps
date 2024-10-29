@@ -7,9 +7,14 @@ import { IconGitHub, IconVellum } from './ui/icons'
 export interface ChatList {
   messages: ChatMessage[]
   isLoading?: boolean
+  workflowDeploymentId: string
 }
 
-export function ChatList({ messages, isLoading = false }: ChatList) {
+export function ChatList({
+  messages,
+  isLoading = false,
+  workflowDeploymentId
+}: ChatList) {
   const lastMessage = useMemo(() => messages.slice(-1)[0], [messages])
   if (!messages.length) {
     return null
@@ -19,7 +24,10 @@ export function ChatList({ messages, isLoading = false }: ChatList) {
     <div className="relative mx-auto max-w-2xl px-4">
       {messages.map((message, index) => (
         <div key={index}>
-          <ChatMessageComponent message={message} />
+          <ChatMessageComponent
+            message={message}
+            workflowDeploymentId={workflowDeploymentId}
+          />
           {index < messages.length - 1 && (
             <Separator className="my-4 md:my-8" />
           )}
