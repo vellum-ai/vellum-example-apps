@@ -5,10 +5,7 @@ import { ChatMessage as ChatMessageSerializer } from 'vellum-ai/serialization'
 import { serialization } from 'vellum-ai/core'
 
 import { auth } from '@/auth'
-import {
-  WorkflowOutputArray,
-  WorkflowOutputString
-} from 'vellum-ai/api'
+import { WorkflowOutputArray, WorkflowOutputString } from 'vellum-ai/api'
 import { nanoid } from 'nanoid'
 import { UINT32_SIZE } from '@/lib/constants'
 
@@ -20,7 +17,8 @@ const vellum = new VellumClient({
 
 const requestBodySerializer = serialization.object({
   id: serialization.string(),
-  messages: serialization.list(ChatMessageSerializer)
+  messages: serialization.list(ChatMessageSerializer),
+  workflowDeploymentId: serialization.string()
 })
 
 class StreamingTextResponse extends Response {
@@ -38,7 +36,8 @@ class StreamingTextResponse extends Response {
 
 export async function POST(req: Request) {
   const json = await req.json()
-  const { id, messages } = await requestBodySerializer.parseOrThrow(json)
+  const { id, messages, workflowDeploymentId } =
+    await requestBodySerializer.parseOrThrow(json)
   const userId = (await auth())?.user.id
 
   if (!userId) {
@@ -47,9 +46,19 @@ export async function POST(req: Request) {
     })
   }
 
+  const selectedWorkflowDeployment =
+    await vellum.workflowDeployments.retrieve(workflowDeploymentId)
+  const stringOutputVariables =
+    selectedWorkflowDeployment.outputVariables.filter(
+      variable => variable.type === 'STRING'
+    )
+  const targetOutputVariableName = stringOutputVariables.sort((a, b) =>
+    a.key.localeCompare(b.key)
+  )[0].key
+
   const res = await vellum
     .executeWorkflowStream({
-      workflowDeploymentName: 'trust-center-bot',
+      workflowDeploymentId,
       inputs: [
         {
           type: 'CHAT_HISTORY',
@@ -89,9 +98,10 @@ export async function POST(req: Request) {
       const emit = (event: unknown) => {
         const jsonString = JSON.stringify(event)
         const lengthBuffer = new Uint8Array(UINT32_SIZE)
-        new DataView(lengthBuffer.buffer).setUint32(0, jsonString.length, false)
+        const encodedJsonString = encoder.encode(jsonString)
+        new DataView(lengthBuffer.buffer).setUint32(0, encodedJsonString.length, false)
         controller.enqueue(Buffer.from(lengthBuffer.buffer))
-        controller.enqueue(encoder.encode(jsonString))
+        controller.enqueue(encodedJsonString)
       }
 
       // TODO: Remove this hack - need some changes on Vellum side
@@ -123,7 +133,7 @@ export async function POST(req: Request) {
               isFunctionCall = true
             }
           }
-          if (!isFunctionCall && output.name == 'answer') {
+          if (!isFunctionCall && output.name == targetOutputVariableName) {
             emit(output)
           }
         }
@@ -131,7 +141,7 @@ export async function POST(req: Request) {
           if (!isFunctionCall) {
             const stringOutputType = event.data.outputs?.find(
               (o): o is WorkflowOutputString =>
-                o.type === 'STRING' && o.name === 'answer'
+                o.type === 'STRING' && o.name === targetOutputVariableName
             )
             if (stringOutputType?.value) {
               await kv.hset(`chat:${id}`, {

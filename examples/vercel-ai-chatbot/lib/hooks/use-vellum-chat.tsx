@@ -168,7 +168,8 @@ const useVellumChat = ({
             )
             buffer = buffer.slice(UINT32_SIZE + eventLength)
 
-            onOutputEvent(JSON.parse(decoder.decode(eventEncoded)))
+            const stringifiedEvent = decoder.decode(eventEncoded)
+            onOutputEvent(JSON.parse(stringifiedEvent))
           }
         }
 
