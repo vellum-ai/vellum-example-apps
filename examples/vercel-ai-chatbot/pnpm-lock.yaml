@@ -96,8 +96,8 @@ dependencies:
     specifier: ^5.1.1
     version: 5.1.1
   vellum-ai:
-    specifier: ^0.8.21
-    version: 0.8.21
+    specifier: ^0.8.29
+    version: 0.8.29
   zod:
     specifier: ^3.22.4
     version: 3.23.8
@@ -1666,12 +1666,12 @@ packages:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
     dev: false
 
-  /cdktf@0.20.9(constructs@10.4.1):
+  /cdktf@0.20.9(constructs@10.3.0):
     resolution: {integrity: sha512-Qv43tY7mhVpe4PC3ZqOSGrDowQ+KPvKHeKbeTs/ynmpjQU7DtshX/9yaeqzC1teWIIAC1BppwZKAOH7QeaoYDA==}
     peerDependencies:
       constructs: ^10.3.0
     dependencies:
-      constructs: 10.4.1
+      constructs: 10.3.0
     dev: false
     bundledDependencies:
       - archiver
@@ -1776,8 +1776,9 @@ packages:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
     dev: true
 
-  /constructs@10.4.1:
-    resolution: {integrity: sha512-eIZhGVl6SFI0T6eKtjDRlgInJn3X3uh6l4MMpRF+cQrCfm1SPkDUAMwwYEJ6bpj0Muv2quKE2E8HrijKGyNGaw==}
+  /constructs@10.3.0:
+    resolution: {integrity: sha512-vbK8i3rIb/xwZxSpTjz3SagHn1qq9BChLEfy5Hf6fB3/2eFbrwt2n9kHwQcS0CPTRBesreeAcsJfMq2229FnbQ==}
+    engines: {node: '>= 16.14.0'}
     dev: false
 
   /cookie@0.6.0:
@@ -5206,11 +5207,11 @@ packages:
       sade: 1.8.1
     dev: false
 
-  /vellum-ai@0.8.21:
-    resolution: {integrity: sha512-rg5nutXHpgYKvCCHw7rhoCKnFHcqqXnbREdAfefXYf+0vdvW/XfErvivTY2dSgnAnf5okz0a9EsWklJuSsUpmw==}
+  /vellum-ai@0.8.29:
+    resolution: {integrity: sha512-xsX39o0p1/Titu1OKwNOYKotB5d/JvKs0dBOIZHwYdtoBs15NKTT4/uxjlwD7puQQxSahaO+7YlP46TlXqh8wQ==}
     dependencies:
-      cdktf: 0.20.9(constructs@10.4.1)
-      constructs: 10.4.1
+      cdktf: 0.20.9(constructs@10.3.0)
+      constructs: 10.3.0
       form-data: 4.0.1
       form-data-encoder: 4.0.2
       formdata-node: 6.0.3

@@ -1,6 +1,16 @@
 import { ExternalLink } from '@/components/external-link'
+import { EmptyDeploymentSelector } from './empty-deployment-selector'
+import { SlimWorkflowDeployment } from 'vellum-ai/api/types/SlimWorkflowDeployment'
 
-export function EmptyScreen() {
+interface EmptyScreenProps {
+  deployments?: SlimWorkflowDeployment[]
+  onDeploymentIdChange: (id: string) => void
+}
+
+export function EmptyScreen({
+  deployments,
+  onDeploymentIdChange
+}: EmptyScreenProps) {
   return (
     <div className="mx-auto max-w-2xl px-4">
       <div className="rounded-lg border bg-background p-8">
@@ -13,9 +23,15 @@ export function EmptyScreen() {
           <ExternalLink href="https://nextjs.org">Next.js</ExternalLink>
         </p>
         <p className="leading-normal text-muted-foreground">
-          You can start a conversation by entering a message below. The chatbot
-          is designed to answer questions about {"Vellum's"} Help Center.
+          You can start a conversation with the selected chatbot by entering a
+          message below.
         </p>
+        {deployments && (
+          <EmptyDeploymentSelector
+            deployments={deployments}
+            onDeploymentIdChange={onDeploymentIdChange}
+          />
+        )}
       </div>
     </div>
   )

@@ -37,7 +37,7 @@ The step-by-step guide is additionally outlined below.
 
 ### Setup your Workflow on Vellum
 
-Navigate to the [Vellum Workflows](https://app.vellum.ai/workflow-sandboxes) tab to get started on creating your own workflow. Be sure to deploy the workflow once you have something you're ready to share.
+Navigate to the [Vellum Workflows](https://app.vellum.ai/workflow-sandboxes) tab to get started on creating your own workflow. Be sure to deploy the workflow once you have something you're ready to share. The workflow should have an input variable of type `CHAT_HISTORY` in order to appear as a chatbot option. The workflow should also have at least one output variable of type `STRING`.
 
 Then, navigate to the [API Keys](https://app.vellum.ai/api-keys) tab and generate your own Vellum API Key at the bottom of the page.
 

@@ -22,10 +22,12 @@ function concatBuffers(a: Uint8Array, b: Uint8Array) {
 const useVellumChat = ({
   initialMessages = [],
   initialChatId,
+  workflowDeploymentId,
   onFunctionCall
 }: {
   initialMessages?: ChatMessage[]
   initialChatId?: string
+  workflowDeploymentId: string
   onFunctionCall?: (functionCall: FunctionCall) => Promise<unknown>
 }) => {
   const id = React.useMemo(() => initialChatId ?? nanoid(), [initialChatId])
@@ -39,7 +41,11 @@ const useVellumChat = ({
   }, [messages])
 
   const triggerRequest = React.useCallback(
-    async (request: { messages: ChatMessage[]; id: string }) => {
+    async (request: {
+      messages: ChatMessage[]
+      id: string
+      workflowDeploymentId: string
+    }) => {
       setIsLoading(true)
 
       const outputs: Record<string, ChatMessageContent | null> = {}
@@ -188,7 +194,8 @@ const useVellumChat = ({
             setMessages(newMessages)
             await triggerRequest({
               messages: newMessages,
-              id: request.id
+              id: request.id,
+              workflowDeploymentId
             })
           }
         }
@@ -197,7 +204,7 @@ const useVellumChat = ({
       }
       setIsLoading(false)
     },
-    [onFunctionCall]
+    [onFunctionCall, workflowDeploymentId]
   )
 
   const append = React.useCallback(
@@ -213,7 +220,8 @@ const useVellumChat = ({
       if (!window.location.pathname.includes('chat')) {
         await addChat({
           id,
-          value
+          value,
+          workflowDeploymentId
         })
         window.history.pushState({}, '', `/chat/${id}`)
       }
@@ -221,7 +229,8 @@ const useVellumChat = ({
       setMessages(newMessages)
       await triggerRequest({
         messages: newMessages,
-        id
+        id,
+        workflowDeploymentId
       })
 
       if (!initialChatId) {
@@ -229,7 +238,7 @@ const useVellumChat = ({
         router.refresh()
       }
     },
-    [id, initialChatId, router, triggerRequest]
+    [id, initialChatId, router, triggerRequest, workflowDeploymentId]
   )
 
   const reload = React.useCallback(() => {
@@ -239,7 +248,8 @@ const useVellumChat = ({
     if (lastAssistantMessageIndex === -1) {
       return triggerRequest({
         messages: messagesRef.current,
-        id
+        id,
+        workflowDeploymentId
       })
     }
 
@@ -250,9 +260,10 @@ const useVellumChat = ({
     setMessages(messagesToReload)
     return triggerRequest({
       messages: messagesToReload,
-      id
+      id,
+      workflowDeploymentId
     })
-  }, [id, triggerRequest])
+  }, [id, triggerRequest, workflowDeploymentId])
 
   const stop = React.useCallback(() => {
     if (abortControllerRef.current) {

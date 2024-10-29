@@ -16,19 +16,20 @@ import { ChatMessage } from 'vellum-ai/api'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { ExternalLink } from './external-link'
-import { WORKFLOW_DEPLOYMENT_ID } from '@/lib/constants'
 
 interface ChatMessageFeedbackDialogProps {
   message: ChatMessage
+  workflowDeploymentId: string
 }
 
 export function ChatMessageFeedbackDialog({
-  message
+  message,
+  workflowDeploymentId
 }: ChatMessageFeedbackDialogProps) {
   const href = useMemo(
     () =>
-      `https://app.vellum.ai/deployments/workflows/${WORKFLOW_DEPLOYMENT_ID}/executions/${message.source}`,
-    [message.source]
+      `https://app.vellum.ai/deployments/workflows/${workflowDeploymentId}/executions/${message.source}`,
+    [message.source, workflowDeploymentId]
   )
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const [quality, setQuality] = React.useState<number | null>(null)
