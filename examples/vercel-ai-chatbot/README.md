@@ -63,6 +63,8 @@ Navigate to `/app/api/chat/route.ts` and edit the name of the workflow to point 
 
 ### Running locally
 
+First, ensure that you are running Node on at least version 20. You can install Node using [nvm](https://github.com/nvm-sh/nvm) and then running `nvm use` on this directory. To ensure that you're always running a specific version of Node, you can run `nvm alias default v20`.
+
 You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
 
 > Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various Vellum and authentication provider accounts.
