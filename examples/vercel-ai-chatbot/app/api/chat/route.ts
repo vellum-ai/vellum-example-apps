@@ -98,9 +98,10 @@ export async function POST(req: Request) {
       const emit = (event: unknown) => {
         const jsonString = JSON.stringify(event)
         const lengthBuffer = new Uint8Array(UINT32_SIZE)
-        new DataView(lengthBuffer.buffer).setUint32(0, jsonString.length, false)
+        const encodedJsonString = encoder.encode(jsonString)
+        new DataView(lengthBuffer.buffer).setUint32(0, encodedJsonString.length, false)
         controller.enqueue(Buffer.from(lengthBuffer.buffer))
-        controller.enqueue(encoder.encode(jsonString))
+        controller.enqueue(encodedJsonString)
       }
 
       // TODO: Remove this hack - need some changes on Vellum side
