@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "custom-prompt-node"
+version = "0.1.0"
+description = ""
+authors = ["Vellum <devops@vellum.ai>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+vellum-ai = "^0.14.47"
+boto3 = "^1.38.3"
+
+[tool.mypy]
+plugins = ["pydantic.mypy", "vellum.plugins.vellum_mypy"]
+check_untyped_defs = true
+exclude = [
+    ".venv",
+]
+
