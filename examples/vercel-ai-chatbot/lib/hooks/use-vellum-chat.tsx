@@ -49,7 +49,6 @@ const useVellumChat = ({
       setIsLoading(true)
 
       const outputs: Record<string, ChatMessageContent | null> = {}
-      const outputIds: string[] = []
       const onOutputEvent = (
         parsedChunkValue: WorkflowResultEventOutputData
       ) => {
@@ -65,7 +64,6 @@ const useVellumChat = ({
         }
 
         if (parsedChunkValue.state === 'INITIATED') {
-          outputIds.push(parsedChunkValue.id)
           outputs[parsedChunkValue.id] = null
         } else if (parsedChunkValue.state === 'STREAMING') {
           const existingOutput = outputs[parsedChunkValue.id]
@@ -83,7 +81,6 @@ const useVellumChat = ({
             parsedChunkValue.value &&
             parsedChunkValue.value.state === 'FULFILLED'
           ) {
-            outputIds.push(parsedChunkValue.id)
             const { state, ...value } = parsedChunkValue.value
             if (state === 'FULFILLED') {
               outputs[parsedChunkValue.id] = {
@@ -102,11 +99,9 @@ const useVellumChat = ({
           }
         }
 
-        const contentOutputs = outputIds
-          .map(id => outputs[id])
-          .filter(
-            (output): output is ArrayChatMessageContentItem => output !== null
-          )
+        const contentOutputs = Object.values(outputs).filter(
+          (output): output is ArrayChatMessageContentItem => output !== null
+        )
         if (contentOutputs.length > 0) {
           const assistantContent =
             contentOutputs.length === 1
