@@ -5,7 +5,7 @@ import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { EmptyScreen } from '@/components/empty-screen'
 import { ChatScrollAnchor } from '@/components/chat-scroll-anchor'
-import { ChatMessage, SlimWorkflowDeployment } from 'vellum-ai/api'
+import { ChatMessage, SlimWorkflowDeployment } from 'vellum-ai/api/types'
 import useVellumChat from '@/lib/hooks/use-vellum-chat'
 import { useState } from 'react'
 
@@ -48,7 +48,7 @@ export function Chat({
 
   return (
     <>
-      <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
+      <div className={cn('pb-[200px] pt-4 md:pt-10 h-full', className)}>
         {messages.length ? (
           <>
             <ChatList
