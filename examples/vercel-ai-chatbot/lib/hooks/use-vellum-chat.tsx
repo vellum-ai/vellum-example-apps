@@ -49,6 +49,7 @@ const useVellumChat = ({
       setIsLoading(true)
 
       const outputs: Record<string, ChatMessageContent | null> = {}
+      let executionId: string | undefined = undefined
       const onOutputEvent = (
         parsedChunkValue: WorkflowResultEventOutputData
       ) => {
@@ -60,6 +61,16 @@ const useVellumChat = ({
         }
 
         if (!parsedChunkValue.id) {
+          return
+        }
+
+        if (
+          parsedChunkValue.state === 'INITIATED' &&
+          parsedChunkValue.type === 'JSON' &&
+          parsedChunkValue.value === null &&
+          parsedChunkValue.id
+        ) {
+          executionId = parsedChunkValue.id
           return
         }
 
@@ -113,7 +124,8 @@ const useVellumChat = ({
           setMessages(
             request.messages.concat({
               role: 'ASSISTANT',
-              content: assistantContent
+              content: assistantContent,
+              source: executionId
             })
           )
         }

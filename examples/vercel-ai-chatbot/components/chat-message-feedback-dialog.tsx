@@ -32,7 +32,7 @@ export function ChatMessageFeedbackDialog({
     [message.source, workflowDeploymentId]
   )
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
-  const [quality, setQuality] = React.useState<number | null>(null)
+  const [quality, _setQuality] = React.useState<number | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitPending, startSubmitTransition] = React.useTransition()
   const submitFeedback = useCallback(async () => {
@@ -71,7 +71,7 @@ export function ChatMessageFeedbackDialog({
             <DialogTitle>Chat Message Feedback</DialogTitle>
           </DialogHeader>
           <div className="mb-4">Did you find this message helpful?</div>
-          <div className="flex gap-4 mb-4">
+          {/* <div className="flex gap-4 mb-4">
             <Button
               onClick={() => {
                 setQuality(1)
@@ -92,7 +92,7 @@ export function ChatMessageFeedbackDialog({
             >
               <IconArrowDown />
             </Button>
-          </div>
+          </div> */}
           <div>
             <Textarea
               ref={inputRef}
