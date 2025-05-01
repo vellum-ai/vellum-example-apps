@@ -48,7 +48,7 @@ export function Chat({
 
   return (
     <>
-      <div className={cn('pb-[200px] pt-4 md:pt-10 h-full', className)}>
+      <div className={cn('pb-[200px] pt-4 md:pt-10 h-full overflow-y-auto', className)}>
         {messages.length ? (
           <>
             <ChatList
