@@ -5,7 +5,11 @@ import { ChatMessage as ChatMessageSerializer } from 'vellum-ai/serialization'
 import { serialization } from 'vellum-ai/core'
 
 import { auth } from '@/auth'
-import { WorkflowOutputArray, WorkflowOutputString } from 'vellum-ai/api'
+import {
+  WorkflowOutputArray,
+  WorkflowOutputString,
+  WorkflowResultEventOutputData
+} from 'vellum-ai/api'
 import { nanoid } from 'nanoid'
 import { UINT32_SIZE } from '@/lib/constants'
 
@@ -34,6 +38,15 @@ class StreamingTextResponse extends Response {
   }
 }
 
+// Temporary measure to enable streaming of Prompt Nodes before the Final Output Node
+// for SDK-enabled Vellum workflows. The PR tracking support for this can be found here:
+// https://github.com/vellum-ai/vellum-python-sdks/pull/1578
+const HACK_STREAMING_NODE_FULFILLED_IDS = new Set<string>([
+  '46ee2136-eeff-40e7-af40-01cd1901412f',
+  '30d0bac7-af26-4d2f-ba8a-53ea44f845f5',
+  'f81fd5d5-8809-459f-adf2-cf60791dfe2b'
+])
+
 export async function POST(req: Request) {
   const json = await req.json()
   const { id, messages, workflowDeploymentId } =
@@ -52,9 +65,13 @@ export async function POST(req: Request) {
     selectedWorkflowDeployment.outputVariables.filter(
       variable => variable.type === 'STRING'
     )
-  const targetOutputVariableName = stringOutputVariables.sort((a, b) =>
+
+  const targetOutputVariable = stringOutputVariables.sort((a, b) =>
     a.key.localeCompare(b.key)
-  )[0].key
+  )[0]
+
+  const targetOutputVariableName = targetOutputVariable.key
+  const targetOutputVariableId = targetOutputVariable.id
 
   const res = await vellum
     .executeWorkflowStream({
@@ -65,7 +82,8 @@ export async function POST(req: Request) {
           value: messages,
           name: 'chat_history'
         }
-      ]
+      ],
+      eventTypes: ['NODE', 'WORKFLOW']
     })
     .then(stream => {
       return {
@@ -108,6 +126,25 @@ export async function POST(req: Request) {
       let startedStreaming = false
 
       for await (const event of res.stream) {
+        if (
+          event.type == 'NODE' &&
+          event.data.state == 'STREAMING' &&
+          event.data.output &&
+          event.data.output.type == 'STRING' &&
+          event.data.output.state == 'STREAMING' &&
+          HACK_STREAMING_NODE_FULFILLED_IDS.has(event.data.nodeId)
+        ) {
+          const nodeOutput: WorkflowResultEventOutputData = {
+            id: targetOutputVariableId, // event.data.output.nodeOutputId,
+            type: 'STRING',
+            name: targetOutputVariableName,
+            delta: event.data.output.value,
+            state: 'STREAMING',
+            nodeId: event.data.nodeId
+          }
+          emit(nodeOutput)
+          continue
+        }
         if (event.type !== 'WORKFLOW') {
           continue
         }
