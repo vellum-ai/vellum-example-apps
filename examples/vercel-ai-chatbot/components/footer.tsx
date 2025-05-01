@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { cn } from '@/lib/utils'
-import Link from 'next/link'
+import { ExternalLink } from './external-link'
 
 export function FooterText({ className, ...props }: React.ComponentProps<'p'>) {
   return (
@@ -13,9 +13,7 @@ export function FooterText({ className, ...props }: React.ComponentProps<'p'>) {
       {...props}
     >
       Click{' '}
-      <Link href="/learn-more" className="underline hover:no-underline">
-        here
-      </Link>{' '}
+      <ExternalLink href="https://www.vellum.ai/learn-more">here</ExternalLink>{' '}
       to learn more.
     </p>
   )
