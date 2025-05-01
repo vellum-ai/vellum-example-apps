@@ -159,6 +159,13 @@ export async function POST(req: Request) {
         }
         if (event.data.state === 'INITIATED') {
           console.log('Workflow initiated', event.executionId)
+          // Hack to emit the executionId event to the client
+          emit({
+            state: 'INITIATED',
+            value: null,
+            type: 'JSON',
+            id: event.executionId
+          })
           continue
         }
         if (event.data.state === 'STREAMING') {
