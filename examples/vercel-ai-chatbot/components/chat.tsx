@@ -8,11 +8,11 @@ import { ChatScrollAnchor } from '@/components/chat-scroll-anchor'
 import { ChatMessage, SlimWorkflowDeployment } from 'vellum-ai/api/types'
 import useVellumChat from '@/lib/hooks/use-vellum-chat'
 import { useState } from 'react'
+import useLocalStorage from 'use-local-storage'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: ChatMessage[]
   initialChatId?: string
-  defaultWorkflowDeploymentId: string
   deployments?: SlimWorkflowDeployment[]
 }
 
@@ -20,11 +20,10 @@ export function Chat({
   initialChatId,
   initialMessages,
   deployments,
-  defaultWorkflowDeploymentId,
   className
 }: ChatProps) {
   const [selectedWorkflowDeploymentId, setSelectedWorkflowDeploymentId] =
-    useState(defaultWorkflowDeploymentId)
+    useLocalStorage('selectedDeploymentId', '')
 
   const { messages, append, reload, stop, isLoading, id } = useVellumChat({
     initialMessages,
@@ -61,6 +60,7 @@ export function Chat({
         ) : (
           <EmptyScreen
             deployments={deployments}
+            selectedDeploymentId={selectedWorkflowDeploymentId}
             onDeploymentIdChange={setSelectedWorkflowDeploymentId}
           />
         )}
