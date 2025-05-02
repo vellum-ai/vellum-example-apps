@@ -7,30 +7,21 @@ import { Button } from '@/components/ui/button'
 
 interface EmptyScreenProps {
   deployments?: SlimWorkflowDeployment[]
+  selectedDeploymentId: string
   onDeploymentIdChange: (id: string) => void
 }
 
 export function EmptyScreen({
   deployments,
-  onDeploymentIdChange: onDeploymentIdChangeProp
+  selectedDeploymentId,
+  onDeploymentIdChange: onDeploymentIdChange
 }: EmptyScreenProps) {
-  const [selectedDeploymentId, setSelectedDeploymentId] = useLocalStorage(
-    'selectedDeploymentId',
-    ''
-  )
   const selectedDeployment = useMemo(() => {
     return deployments?.find(
       deployment => deployment.id === selectedDeploymentId
     )
   }, [deployments, selectedDeploymentId])
 
-  const onDeploymentIdChange = useCallback(
-    (id: string) => {
-      setSelectedDeploymentId(id)
-      onDeploymentIdChangeProp(id)
-    },
-    [onDeploymentIdChangeProp, setSelectedDeploymentId]
-  )
   return (
     <div className="mx-auto max-w-2xl px-4 h-full">
       <div className="rounded-lg border bg-background p-8 h-full">

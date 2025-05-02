@@ -7,10 +7,5 @@ const loadDeployments = cache(async () => {
 export default async function IndexPage() {
   const deployments = await loadDeployments()
 
-  return (
-    <Chat
-      deployments={deployments}
-      defaultWorkflowDeploymentId={deployments[0].id}
-    />
-  )
+  return <Chat deployments={deployments} />
 }

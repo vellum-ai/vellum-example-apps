@@ -6,7 +6,6 @@ export interface Chat extends Record<string, any> {
   createdAt: Date
   userId: string
   messages: ChatMessage[]
-  workflowDeploymentId: string
 }
 
 export type ServerActionResult<Result> = Promise<
