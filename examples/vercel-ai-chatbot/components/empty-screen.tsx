@@ -1,8 +1,7 @@
 import { ExternalLink } from '@/components/external-link'
 import { EmptyDeploymentSelector } from './empty-deployment-selector'
 import { SlimWorkflowDeployment } from 'vellum-ai/api/types/SlimWorkflowDeployment'
-import useLocalStorage from 'use-local-storage'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface EmptyScreenProps {
@@ -24,7 +23,7 @@ export function EmptyScreen({
 
   return (
     <div className="mx-auto max-w-2xl px-4 h-full">
-      <div className="rounded-lg border bg-background p-8 h-full">
+      <div className="rounded-lg border bg-background p-8 h-full overflow-y-scroll">
         {selectedDeployment ? (
           <div className="mt-4 flex flex-col gap-4 h-full">
             <h1 className="text-lg font-semibold">
